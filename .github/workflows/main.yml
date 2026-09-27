@@ -1,14 +1,16 @@
 name: Build Portable Windows Executable
 
 on:
-  workflow_dispatch: # Enables manual run button in GitHub Actions tab
+  workflow_dispatch:
   push:
     tags:
       - 'v*'
 
 jobs:
   build:
-    runs-on: windows-2019
+    runs-on: windows-latest
+    permissions:
+      contents: write
 
     steps:
     - name: Check out repository
@@ -44,6 +46,8 @@ jobs:
     - name: Upload Single Executable to GitHub Release
       uses: softprops/action-gh-release@v1
       with:
+        tag_name: ${{ github.ref_name }}
+        name: Release ${{ github.ref_name }}
         files: desktop-app/dist/SoumiliConverter.exe
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
