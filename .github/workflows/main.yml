@@ -14,10 +14,10 @@ jobs:
 
     steps:
     - name: Check out repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Set up Python 3.7
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.7'
 
@@ -26,19 +26,27 @@ jobs:
         python -m pip install --upgrade pip
         pip install flask python-docx pyinstaller==5.13.2
 
+    - name: Verify Converters Directory Exists
+      run: |
+        if (!(Test-Path -Path "converters")) {
+          Write-Error "The 'converters' directory does not exist in root."
+          exit 1
+        }
+
     - name: Build Python EXE with PyInstaller
       run: |
         pyinstaller --noconfirm --onedir --console --add-data "converters;converters" app.py
-        mkdir desktop-app\python-backend
-        xcopy /E /I /Y dist\app\* desktop-app\python-backend\
+        if (!(Test-Path -Path "python-backend")) {
+          New-Item -ItemType Directory -Path "python-backend"
+        }
+        xcopy /E /I /Y dist\app\* python-backend\
 
     - name: Set up Node.js 18
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
       with:
         node-version: '18'
 
     - name: Build Single Portable Executable
-      working-directory: ./desktop-app
       run: |
         npm install
         npm run dist
@@ -48,6 +56,6 @@ jobs:
       with:
         tag_name: ${{ github.ref_name }}
         name: Release ${{ github.ref_name }}
-        files: desktop-app/dist/SoumiliConverter.exe
+        files: dist/SoumiliConverter.exe
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
