@@ -1,6 +1,8 @@
 {
   "name": "soumili-converter",
   "version": "1.0.0",
+  "description": "STM / Soumili ANSI to Unicode File Converter Desktop App",
+  "author": "Sroy",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
@@ -8,6 +10,9 @@
   },
   "build": {
     "appId": "com.converter.app",
+    "files": [
+      "main.js"
+    ],
     "win": {
       "target": "portable"
     },
