@@ -1,6 +1,7 @@
 name: Build Portable Windows Executable
 
 on:
+  workflow_dispatch: # Enables manual run button in GitHub Actions tab
   push:
     tags:
       - 'v*'
