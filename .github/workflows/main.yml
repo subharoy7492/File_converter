@@ -41,10 +41,10 @@ jobs:
         }
         xcopy /E /I /Y dist\app\* python-backend\
 
-    - name: Set up Node.js 18
+    - name: Set up Node.js 20
       uses: actions/setup-node@v4
       with:
-        node-version: '18'
+        node-version: '20'
 
     - name: Build Single Portable Executable
       run: |
@@ -52,7 +52,7 @@ jobs:
         npm run dist
 
     - name: Upload Single Executable to GitHub Release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       with:
         tag_name: ${{ github.ref_name }}
         name: Release ${{ github.ref_name }}
