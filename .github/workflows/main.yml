@@ -1,28 +1,48 @@
-name: Build Zero-Install Flask Docx App
-on: [push, workflow_dispatch]
+name: Build Portable Windows Executable
+
+on:
+  push:
+    tags:
+      - 'v*'
 
 jobs:
   build:
-    runs-on: windows-latest
-    steps:
-    - uses: actions/checkout@v4
+    runs-on: windows-2019
 
-    - name: Setup Python 3.7
-      uses: actions/setup-python@v5
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@v3
+
+    - name: Set up Python 3.7
+      uses: actions/setup-python@v4
       with:
         python-version: '3.7'
 
-    - name: Install Libraries
+    - name: Install Python Dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt
+        pip install flask python-docx pyinstaller==5.13.2
 
-    - name: Compile with PyInstaller
+    - name: Build Python EXE with PyInstaller
       run: |
-        pyinstaller --onefile --collect-all docx --collect-all flask app.py
+        pyinstaller --noconfirm --onedir --console --add-data "converters;converters" app.py
+        mkdir desktop-app\python-backend
+        xcopy /E /I /Y dist\app\* desktop-app\python-backend\
 
-    - name: Upload Finished EXE
-      uses: actions/upload-artifact@v4
+    - name: Set up Node.js 18
+      uses: actions/setup-node@v3
       with:
-        name: Flask-Docx-Executable
-        path: dist/
+        node-version: '18'
+
+    - name: Build Single Portable Executable
+      cd: desktop-app
+      run: |
+        npm install
+        npm run dist
+
+    - name: Upload Single Executable to GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: desktop-app/dist/SoumiliConverter.exe
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
