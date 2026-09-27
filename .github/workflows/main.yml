@@ -35,7 +35,7 @@ jobs:
         node-version: '18'
 
     - name: Build Single Portable Executable
-      cd: desktop-app
+      working-directory: ./desktop-app
       run: |
         npm install
         npm run dist
