@@ -1,0 +1,29 @@
+{
+  "name": "soumili-converter",
+  "version": "1.0.0",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder"
+  },
+  "build": {
+    "appId": "com.converter.app",
+    "win": {
+      "target": "portable"
+    },
+    "portable": {
+      "artifactName": "SoumiliConverter.exe"
+    },
+    "extraResources": [
+      {
+        "from": "python-backend",
+        "to": "python-backend",
+        "filter": ["**/*"]
+      }
+    ]
+  },
+  "devDependencies": {
+    "electron": "^22.3.27",
+    "electron-builder": "^24.9.1"
+  }
+}
