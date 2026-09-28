@@ -310,7 +310,7 @@ def clear_previous_result() -> None:
 
 
 st.title("🔄 ANSI Document Converter")
-st.caption("Convert ANSI/Bijoy-style Bengali text to Unicode Bengali.")
+st.caption("Convert Bijoy/STM/Soumili Bengali text to Unicode Bengali.")
 
 
 converter_keys, converter_names = get_converter_options()
