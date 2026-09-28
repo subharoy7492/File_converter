@@ -1,4 +1,4 @@
-name: Build Windows 7 Compatible Portable Executable
+name: Build Portable Windows Executable
 
 on:
   workflow_dispatch:
@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latestt
+    runs-on: windows-latest
     permissions:
       contents: write
 
@@ -29,7 +29,7 @@ jobs:
     - name: Verify Converters Directory Exists
       run: |
         if (!(Test-Path -Path "converters")) {
-          Write-Error "The 'converters' directory does not exist in root."
+          Write-Error "The 'converters' directory does not exist in root repository."
           exit 1
         }
 
