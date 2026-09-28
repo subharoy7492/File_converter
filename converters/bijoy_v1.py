@@ -1,10 +1,10 @@
 import re
 
 class BijoyToUnicodeV1:
-    """Version 1 of Bijoy to Unicode Converter Engine (Fixed)"""
+    """Version 1 of Bijoy to Unicode Converter Engine (Fully Corrected)"""
     
     def __init__(self):
-        # Maps ordered longest-key-first
+        # 1. Pre-conversion replacements
         self.pre_conversion_map = [
             (r' +', ' '),
             (r'yy', 'y'),
@@ -24,7 +24,7 @@ class BijoyToUnicodeV1:
             (r'\n{3,}', '\n\n')
         ]
 
-        # Key-value mapping array (sorted by key length descending to prevent sub-string collision)
+        # 2. Raw character conversion map
         raw_conversion_map = {
             'Av': 'আ', 'A': 'অ', 'B': 'ই', 'C': 'ঈ', 'D': 'উ', 'E': 'ঊ',
             'F': 'ঋ', 'G': 'এ', 'H': 'ঐ', 'I': 'ও', 'J': 'ঔ',
@@ -64,13 +64,14 @@ class BijoyToUnicodeV1:
             'ú': '্প', 'û': 'হু', 'ü': 'হৃ', 'ý': 'হ্ন', 'þ': 'হ্ম'
         }
 
-        # Sort keys by length descending so longer tokens match first
+        # Sort conversion map by key length descending
         self.conversion_map = sorted(
             [(re.escape(k), v) for k, v in raw_conversion_map.items()],
             key=lambda item: len(item[0]),
             reverse=True
         )
 
+        # 3. Post-conversion replacements
         self.post_conversion_map = [
             (r'০ঃ', '০:'), (r'১ঃ', '১:'), (r'২ঃ', '২:'), (r'৩ঃ', '৩:'), (r'৪ঃ', '৪:'),
             (r'৫ঃ', '৫:'), (r'৬ঃ', '৬:'), (r'৭ঃ', '৭:'), (r'৮ঃ', '৮:'), (r'৯ঃ', '৯:'),
@@ -96,7 +97,7 @@ class BijoyToUnicodeV1:
         i = 0
         n = len(chars)
 
-        # Step 1: Shift pre-kars (ি, ে, ৈ) after consonant cluster/conjuncts
+        # Step 1: Shift pre-kars (ি, ে, ৈ) past consonant clusters / conjuncts
         res = []
         while i < n:
             c = chars[i]
@@ -105,7 +106,7 @@ class BijoyToUnicodeV1:
                 i += 1
                 cluster = []
                 
-                # Consume the consonant cluster (e.g. ক + ্ + ষ)
+                # Extract the entire consonant cluster (e.g. ক + ্ + ষ)
                 while i < n and self.is_bangla_banjonborno(chars[i]):
                     cluster.append(chars[i])
                     if i + 1 < n and self.is_bangla_halant(chars[i + 1]):
@@ -115,7 +116,7 @@ class BijoyToUnicodeV1:
                         i += 1
                         break
                 
-                # Check for combined vowel signs (ে + া -> ো / ে + ৗ -> ৌ)
+                # Handle combined vowel signs: ে + া -> ো and ে + ৗ -> ৌ
                 if kar == 'ে' and i < n:
                     if chars[i] == 'া':
                         kar = 'ো'
@@ -132,15 +133,13 @@ class BijoyToUnicodeV1:
 
         text = "".join(res)
 
-        # Step 2: Handle Ref (র্) shifting
-        # Move 'র' + '্' behind consonant cluster
+        # Step 2: Handle Ref (র্) shifting - moves 'র' + '্' before consonant clusters
         chars = list(text)
         i = 0
         n = len(chars)
         res = []
         while i < n:
             if i + 1 < n and chars[i] == 'র' and chars[i + 1] == '্':
-                # Check if it's a ref (followed by a consonant)
                 if i + 2 < n and self.is_bangla_banjonborno(chars[i + 2]):
                     ref = ['র', '্']
                     i += 2
@@ -153,7 +152,6 @@ class BijoyToUnicodeV1:
                         else:
                             i += 1
                             break
-                    # Append kar if present right after consonant
                     if i < n and chars[i] in ('ি', 'ী', 'ু', 'ূ', 'ৃ', 'ে', 'ৈ', 'ো', 'ৌ', 'া'):
                         cluster.append(chars[i])
                         i += 1
@@ -171,18 +169,18 @@ class BijoyToUnicodeV1:
         if not src_string:
             return ""
 
-        # Pre-conversion replacements
+        # Pre-conversion regex replacements
         for pattern, replacement in self.pre_conversion_map:
             src_string = re.sub(pattern, replacement, src_string)
 
-        # Primary character mapping
+        # Main character map replacement
         for pattern, replacement in self.conversion_map:
             src_string = re.sub(pattern, replacement, src_string)
 
-        # Structural rearrangement (Pre-kar and Ref handling)
+        # Positional reordering
         src_string = self.re_arrange_unicode_converted_text(src_string)
 
-        # Post-conversion replacements
+        # Post-conversion regex replacements
         for pattern, replacement in self.post_conversion_map:
             src_string = re.sub(pattern, replacement, src_string)
 
