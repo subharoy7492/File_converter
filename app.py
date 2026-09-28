@@ -26,7 +26,17 @@ st.set_page_config(
     page_icon="🔄",
     layout="centered",
 )
-
+st.markdown(
+    """
+    <style>
+    div[data-testid="stFormSubmitButton"] button {
+        background-color: #2563eb;
+        color: white;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
 
 ANSI_FONT_KEYWORDS = [
     "sutonny",
