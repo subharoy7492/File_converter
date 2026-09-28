@@ -1,31 +1,31 @@
 import re
 
 class BijoyToUnicodeV1:
-    """Version 1 of Bijoy to Unicode Converter Engine"""
+    """Version 1 of Bijoy to Unicode Converter Engine (Fixed)"""
     
     def __init__(self):
-        self.pre_conversion_map = {
-            r' +': ' ',
-            r'yy': 'y',
-            r'vv': 'v',
-            r'­­': '­',
-            r'y&': 'y',
-            r'„&': '„',
-            r'‡u': 'u‡',
-            r'wu': 'uw',
-            r' ,': ',',
-            r' \|': '\|',
-            r'\\ ': '',
-            r' \\': '',
-            r'\\': '',
-            r'\n +': '\n',
-            r' +\n': '\n',
-            r'\n\n\n\n\n': '\n\n',
-            r'\n\n\n\n': '\n\n',
-            r'\n\n\n': '\n\n'
-        }
+        # Maps ordered longest-key-first
+        self.pre_conversion_map = [
+            (r' +', ' '),
+            (r'yy', 'y'),
+            (r'vv', 'v'),
+            (r'­­', '­'),
+            (r'y&', 'y'),
+            (r'„&', '„'),
+            (r'‡u', 'u‡'),
+            (r'wu', 'uw'),
+            (r' ,', ','),
+            (r' \|', '|'),
+            (r'\\ ', ''),
+            (r' \\', ''),
+            (r'\\', ''),
+            (r'\n +', '\n'),
+            (r' +\n', '\n'),
+            (r'\n{3,}', '\n\n')
+        ]
 
-        self.conversion_map = {
+        # Key-value mapping array (sorted by key length descending to prevent sub-string collision)
+        raw_conversion_map = {
             'Av': 'আ', 'A': 'অ', 'B': 'ই', 'C': 'ঈ', 'D': 'উ', 'E': 'ঊ',
             'F': 'ঋ', 'G': 'এ', 'H': 'ঐ', 'I': 'ও', 'J': 'ঔ',
             'K': 'ক', 'L': 'খ', 'M': 'গ', 'N': 'ঘ', 'O': 'ঙ', 'P': 'চ',
@@ -33,14 +33,14 @@ class BijoyToUnicodeV1:
             'W': 'ড', 'X': 'ঢ', 'Y': 'ণ', 'Z': 'ত', '_': 'থ', '`': 'দ',
             'a': 'ধ', 'b': 'ন', 'c': 'প', 'd': 'ফ', 'e': 'ব', 'f': 'ভ',
             'g': 'ম', 'h': 'য', 'i': 'র', 'j': 'ল', 'k': 'শ', 'l': 'ষ',
-            'm': 'স', 'n': 'হ', 'o': 'ড়', 'p': 'ঢ়', 'q': 'য়', 'r': 'ৎ',
+            'm': 'স', 'n': 'হ', 'o': 'ড়', 'p': 'ঢ়', 'q': 'য়', 'r': 'ৎ',
             's': 'ং', 't': 'ঃ', 'u': 'ঁ',
             '0': '০', '1': '১', '2': '২', '3': '৩', '4': '৪', '5': '৫',
             '6': '৬', '7': '৭', '8': '৮', '9': '৯',
             '•': 'ঙ্', 'v': 'া', 'w': 'ি', 'x': 'ী', 'y': 'ু', 'z': 'ু',
             '“': 'ু', '–': 'ু', '~': 'ূ', 'ƒ': 'ূ', '‚': 'ূ', '„„': 'ৃ',
             '„': 'ৃ', '…': 'ৃ', '†': 'ে', '‡': 'ে', 'ˆ': 'ৈ', '‰': 'ৈ',
-            'Š': 'ৗ', r'\|': '।', r'\&': '্‌', r'\^': '্ব', '‘': '্তু',
+            'Š': 'ৗ', '|': '।', '&': '্‌', '^': '্ব', '‘': '্তু',
             '’': '্থ', '‹': '্ক', 'Œ': '্ক্র', '”': 'চ্', '—': '্ত',
             '˜': 'দ্', '™': 'দ্', 'š': 'ন্', '›': 'ন্', 'œ': '্ন',
             'Ÿ': '্ব', '¡': '্ব', '¢': '্ভ', '£': '্ভ্র', '¤': 'ম্',
@@ -64,23 +64,22 @@ class BijoyToUnicodeV1:
             'ú': '্প', 'û': 'হু', 'ü': 'হৃ', 'ý': 'হ্ন', 'þ': 'হ্ম'
         }
 
-        self.pro_conversion_map = {'্্': '্'}
+        # Sort keys by length descending so longer tokens match first
+        self.conversion_map = sorted(
+            [(re.escape(k), v) for k, v in raw_conversion_map.items()],
+            key=lambda item: len(item[0]),
+            reverse=True
+        )
 
-        self.post_conversion_map = {
-            r'০ঃ': '০:', r'১ঃ': '১:', r'২ঃ': '২:', r'৩ঃ': '৩:', r'৪ঃ': '৪:',
-            r'৫ঃ': '৫:', r'৬ঃ': '৬:', r'৭ঃ': '৭:', r'৮ঃ': '৮:', r'৯ঃ': '৯:',
-            r' ঃ': ' :', r'\nঃ': '\n:', r']ঃ': ']:', r'\[ঃ': '[:',
-            r'  ': ' ', r'অা': 'আ', r'্‌্‌': '্‌'
-        }
+        self.post_conversion_map = [
+            (r'০ঃ', '০:'), (r'১ঃ', '১:'), (r'২ঃ', '২:'), (r'৩ঃ', '৩:'), (r'৪ঃ', '৪:'),
+            (r'৫ঃ', '৫:'), (r'৬ঃ', '৬:'), (r'৭ঃ', '৭:'), (r'৮ঃ', '৮:'), (r'৯ঃ', '৯:'),
+            (r' ঃ', ' :'), (r'\nঃ', '\n:'), (r']ঃ', ']:'), (r'\[ঃ', '[:'),
+            (r'  ', ' '), (r'অা', 'আ'), (r'্‌্‌', '্‌')
+        ]
 
     def is_bangla_pre_kar(self, c):
         return c in ('ি', 'ৈ', 'ে')
-
-    def is_bangla_post_kar(self, c):
-        return c in ('া', 'ো', 'ৌ', 'ৗ', 'ু', 'ূ', 'ী', 'ৃ')
-
-    def is_bangla_kar(self, c):
-        return self.is_bangla_pre_kar(c) or self.is_bangla_post_kar(c)
 
     def is_bangla_banjonborno(self, c):
         return c in (
@@ -89,115 +88,102 @@ class BijoyToUnicodeV1:
             'স', 'হ', 'ড়', 'ঢ়', 'য়', 'ৎ', 'ং', 'ঃ', 'ঁ'
         )
 
-    def is_bangla_nukta(self, c):
-        return c == 'ঁ'
-
     def is_bangla_halant(self, c):
         return c == '্'
 
-    def is_space(self, c):
-        return c in (' ', '\t', '\n', '\r')
-
-    def _mb_char_at(self, string, i):
-        return string[i] if 0 <= i < len(string) else ''
-
-    def _substring(self, string, start, end):
-        return string[start:end]
-
-    def _do_char_map(self, text, char_map):
-        for src_key, key_val in char_map.items():
-            text = re.sub(src_key, key_val, text)
-        return text
-
-    def re_arrange_unicode_converted_text(self, str_val):
+    def re_arrange_unicode_converted_text(self, text):
+        chars = list(text)
         i = 0
-        while i < len(str_val):
-            if (i < len(str_val) - 1 and self._mb_char_at(str_val, i) == 'র' and 
-                self.is_bangla_halant(self._mb_char_at(str_val, i + 1)) and 
-                not self.is_bangla_halant(self._mb_char_at(str_val, i - 1))):
-                j = 1
-                while True:
-                    if i - j < 0: break
-                    if (self.is_bangla_banjonborno(self._mb_char_at(str_val, i - j)) and 
-                        self.is_bangla_halant(self._mb_char_at(str_val, i - j - 1))):
-                        j += 2
-                    elif j == 1 and self.is_bangla_kar(self._mb_char_at(str_val, i - j)):
-                        j += 1
-                    else: break
+        n = len(chars)
 
-                temp = self._substring(str_val, 0, i - j)
-                temp += self._mb_char_at(str_val, i) + self._mb_char_at(str_val, i + 1)
-                temp += self._substring(str_val, i - j, i)
-                temp += self._substring(str_val, i + 2, len(str_val))
-                str_val = temp
+        # Step 1: Shift pre-kars (ি, ে, ৈ) after consonant cluster/conjuncts
+        res = []
+        while i < n:
+            c = chars[i]
+            if self.is_bangla_pre_kar(c) and (i + 1 < n) and self.is_bangla_banjonborno(chars[i + 1]):
+                kar = c
                 i += 1
-                continue
+                cluster = []
+                
+                # Consume the consonant cluster (e.g. ক + ্ + ষ)
+                while i < n and self.is_bangla_banjonborno(chars[i]):
+                    cluster.append(chars[i])
+                    if i + 1 < n and self.is_bangla_halant(chars[i + 1]):
+                        cluster.append(chars[i + 1])
+                        i += 2
+                    else:
+                        i += 1
+                        break
+                
+                # Check for combined vowel signs (ে + া -> ো / ে + ৗ -> ৌ)
+                if kar == 'ে' and i < n:
+                    if chars[i] == 'া':
+                        kar = 'ো'
+                        i += 1
+                    elif chars[i] == 'ৗ':
+                        kar = 'ৌ'
+                        i += 1
+
+                res.extend(cluster)
+                res.append(kar)
+            else:
+                res.append(c)
+                i += 1
+
+        text = "".join(res)
+
+        # Step 2: Handle Ref (র্) shifting
+        # Move 'র' + '্' behind consonant cluster
+        chars = list(text)
+        i = 0
+        n = len(chars)
+        res = []
+        while i < n:
+            if i + 1 < n and chars[i] == 'র' and chars[i + 1] == '্':
+                # Check if it's a ref (followed by a consonant)
+                if i + 2 < n and self.is_bangla_banjonborno(chars[i + 2]):
+                    ref = ['র', '্']
+                    i += 2
+                    cluster = []
+                    while i < n and self.is_bangla_banjonborno(chars[i]):
+                        cluster.append(chars[i])
+                        if i + 1 < n and self.is_bangla_halant(chars[i + 1]):
+                            cluster.append(chars[i + 1])
+                            i += 2
+                        else:
+                            i += 1
+                            break
+                    # Append kar if present right after consonant
+                    if i < n and chars[i] in ('ি', 'ী', 'ু', 'ূ', 'ৃ', 'ে', 'ৈ', 'ো', 'ৌ', 'া'):
+                        cluster.append(chars[i])
+                        i += 1
+                    
+                    res.extend(ref)
+                    res.extend(cluster)
+                    continue
+
+            res.append(chars[i])
             i += 1
 
-        str_val = self._do_char_map(str_val, self.pro_conversion_map)
-
-        i = 0
-        while i < len(str_val):
-            if (i < len(str_val) - 1 and self._mb_char_at(str_val, i) == 'র' and 
-                self.is_bangla_halant(self._mb_char_at(str_val, i + 1)) and 
-                not self.is_bangla_halant(self._mb_char_at(str_val, i - 1)) and 
-                self.is_bangla_halant(self._mb_char_at(str_val, i + 2))):
-                j = 1
-                while True:
-                    if i - j < 0: break
-                    if (self.is_bangla_banjonborno(self._mb_char_at(str_val, i - j)) and 
-                        self.is_bangla_halant(self._mb_char_at(str_val, i - j - 1))):
-                        j += 2
-                    elif j == 1 and self.is_bangla_kar(self._mb_char_at(str_val, i - j)):
-                        j += 1
-                    else: break
-
-                temp = self._substring(str_val, 0, i - j)
-                temp += self._mb_char_at(str_val, i) + self._mb_char_at(str_val, i + 1)
-                temp += self._substring(str_val, i - j, i)
-                temp += self._substring(str_val, i + 2, len(str_val))
-                str_val = temp
-                i += 1
-                continue
-
-            if (i > 0 and self._mb_char_at(str_val, i) == '\u09CD' and 
-                (self.is_bangla_kar(self._mb_char_at(str_val, i - 1)) or self.is_bangla_nukta(self._mb_char_at(str_val, i - 1))) and 
-                i < len(str_val) - 1):
-                temp = self._substring(str_val, 0, i - 1)
-                temp += self._mb_char_at(str_val, i) + self._mb_char_at(str_val, i + 1) + self._mb_char_at(str_val, i - 1)
-                temp += self._substring(str_val, i + 2, len(str_val))
-                str_val = temp
-
-            if (i < len(str_val) - 1 and self.is_bangla_pre_kar(self._mb_char_at(str_val, i)) and 
-                not self.is_space(self._mb_char_at(str_val, i + 1))):
-                temp = self._substring(str_val, 0, i)
-                j = 1
-                while (i + j) < len(str_val) - 1 and self.is_bangla_banjonborno(self._mb_char_at(str_val, i + j)):
-                    if (i + j) < len(str_val) and self.is_bangla_halant(self._mb_char_at(str_val, i + j + 1)):
-                        j += 2
-                    else: break
-
-                temp += self._substring(str_val, i + 1, i + j + 1)
-                l = 0
-                if self._mb_char_at(str_val, i) == 'ে' and self._mb_char_at(str_val, i + j + 1) == 'া':
-                    temp += "ো"; l = 1
-                elif self._mb_char_at(str_val, i) == 'ে' and self._mb_char_at(str_val, i + j + 1) == "ৗ":
-                    temp += "ৌ"; l = 1
-                else:
-                    temp += self._mb_char_at(str_val, i)
-
-                temp += self._substring(str_val, i + j + l + 1, len(str_val))
-                str_val = temp
-                i += j
-
-            i += 1
-        return str_val
+        return "".join(res)
 
     def convert(self, src_string):
         if not src_string:
             return ""
-        src_string = self._do_char_map(src_string, self.pre_conversion_map)
-        src_string = self._do_char_map(src_string, self.conversion_map)
+
+        # Pre-conversion replacements
+        for pattern, replacement in self.pre_conversion_map:
+            src_string = re.sub(pattern, replacement, src_string)
+
+        # Primary character mapping
+        for pattern, replacement in self.conversion_map:
+            src_string = re.sub(pattern, replacement, src_string)
+
+        # Structural rearrangement (Pre-kar and Ref handling)
         src_string = self.re_arrange_unicode_converted_text(src_string)
-        src_string = self._do_char_map(src_string, self.post_conversion_map)
+
+        # Post-conversion replacements
+        for pattern, replacement in self.post_conversion_map:
+            src_string = re.sub(pattern, replacement, src_string)
+
         return src_string
