@@ -372,7 +372,8 @@ class StmToUnicodeV3:
             "È": "্র",
             "É": "্র",
             "Ä": "্য",
-            "ä": "্"
+            "ä": "্",
+            "r": "ন্"
         }
 
         self.pro_conversion_map = {'্্': '্'}
