@@ -409,7 +409,7 @@ st.markdown(
     """
     <div class="app-header">
         <div class="app-title">
-            <span>⚡</span> ANSI Document Converter
+            ANSI Document Converter
         </div>
         <p class="app-subtitle">Effortlessly convert legacy Bijoy, STM & Soumili text to Unicode</p>
     </div>
