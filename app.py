@@ -23,8 +23,7 @@ logger = logging.getLogger(__name__)
 
 # --- Page Configuration ---
 st.set_page_config(
-    page_title="ANSI Document Converter",
-    page_icon="⚡",
+    page_title="ANSI to Unicode Document Converter",
     layout="centered",
     initial_sidebar_state="collapsed",
 )
