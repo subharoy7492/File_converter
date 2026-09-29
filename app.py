@@ -34,7 +34,7 @@ header[data-testid="stHeader"] {
 
 /* 2. Reduce top padding of the main container */
 .block-container {
-    padding-top: 0.5rem !important; /* Adjust down from standard 6rem to lower/raise text */
+    padding-top: 1rem !important; /* Adjust down from standard 6rem to lower/raise text */
 }
 
 # --- Tailwind CSS-Inspired Modern Theme Injections ---
