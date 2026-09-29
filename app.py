@@ -27,6 +27,15 @@ st.set_page_config(
     layout="centered",
     initial_sidebar_state="collapsed",
 )
+/* 1. Hide the top-right header menu (includes GitHub icon, Deploy button, and status) */
+header[data-testid="stHeader"] {
+    display: none !important;
+}
+
+/* 2. Reduce top padding of the main container */
+.block-container {
+    padding-top: 0rem !important; /* Adjust down from standard 6rem to lower/raise text */
+}
 
 # --- Tailwind CSS-Inspired Modern Theme Injections ---
 st.markdown(
