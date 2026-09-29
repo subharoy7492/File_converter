@@ -23,19 +23,11 @@ logger = logging.getLogger(__name__)
 
 # --- Page Configuration ---
 st.set_page_config(
-    page_title="ANSI to Unicode Document Converter",
+    page_title="ANSI Document Converter",
+    page_icon="⚡",
     layout="centered",
     initial_sidebar_state="collapsed",
 )
-/* 1. Hide the top-right header menu (includes GitHub icon, Deploy button, and status) */
-header[data-testid="stHeader"] {
-    display: none !important;
-}
-
-/* 2. Reduce top padding of the main container */
-.block-container {
-    padding-top: 1rem !important; /* Adjust down from standard 6rem to lower/raise text */
-}
 
 # --- Tailwind CSS-Inspired Modern Theme Injections ---
 st.markdown(
@@ -48,9 +40,14 @@ st.markdown(
         font-family: 'Inter', sans-serif;
     }
 
-    /* Main Container Padding */
+    /* Hide top-right Streamlit header (GitHub link, deploy status, menu) */
+    header[data-testid="stHeader"] {
+        display: none !important;
+    }
+
+    /* Main Container Padding - reduced top padding to bring text higher */
     .block-container {
-        padding-top: 2rem;
+        padding-top: 1rem !important;
         padding-bottom: 3rem;
         max-width: 720px;
     }
@@ -589,4 +586,4 @@ st.markdown(
     </div>
     """,
     unsafe_allow_html=True,
-)
+    )
