@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 # --- Page Configuration ---
 st.set_page_config(
     page_title="ANSI Document Converter",
-    page_icon="⚡",
+    page_icon="🔄",
     layout="centered",
     initial_sidebar_state="collapsed",
 )
@@ -417,7 +417,7 @@ st.markdown(
         <div class="app-title">
             ANSI Document Converter
         </div>
-        <p class="app-subtitle">Effortlessly convert legacy Bijoy, STM & Soumili text to Unicode</p>
+        <p class="app-subtitle">Convert legacy Bijoy, STM & Soumili text to Unicode</p>
     </div>
     """,
     unsafe_allow_html=True,
