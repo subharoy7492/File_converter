@@ -1,5 +1,6 @@
 from .bijoy_v1 import BijoyToUnicodeV1
 from .stm_v3 import StmToUnicodeV3
+from .srv_v6 import SrvToUnicodeV6
 
 CONVERTERS = {
     'bijoy_v1': {
@@ -9,6 +10,10 @@ CONVERTERS = {
     'stm_v3': {
         'name': 'STM Engine v3.0 (Advanced)',
         'instance': StmToUnicodeV3()
+    },
+    'srv_v6': {
+        'name': 'SRV Engine v6.0 (Advanced)',
+        'instance': SrvToUnicodeV6()
     }
 }
 
