@@ -106,35 +106,31 @@ class StmToUnicodeV2:
             r'  ': ' ', r'অা': 'আ', r'ো': 'ো', r'ৌ': 'ৌ'
         }
 
-    def is_bangla_pre_kar(self, c):
-        return c in ('ি', 'ৈ', 'ে')
-
-    def is_bangla_banjonborno(self, c):
-        return c in (
-            'ক', 'খ', 'গ', 'ঘ', 'ঙ', 'চ', 'ছ', 'জ', 'ঝ', 'ঞ', 'ট', 'ঠ', 'ড', 'ঢ', 'ণ',
-            'ত', 'থ', 'দ', 'ধ', 'ন', 'প', 'ফ', 'ব', 'ভ', 'ম', 'য', 'র', 'ল', 'শ', 'ষ',
-            'স', 'হ', 'ড়', 'ঢ়', 'য়', 'ৎ'
-        )
-
     def _do_char_map(self, text, char_map):
-        for src_key, key_val in char_map.items():
+        # Sort keys by length descending to match multi-char sequences first
+        sorted_map = dict(sorted(char_map.items(), key=lambda x: len(x[0]), reverse=True))
+        for src_key, key_val in sorted_map.items():
             text = re.sub(src_key, key_val, text)
         return text
 
     def re_arrange_unicode_converted_text(self, text):
         """
-        Fixes Reph (র্) and Pre-Kar (ে, ৈ, ি) positioning using RegEx
+        Fixes position of Reph (র্) and Pre-Kar (ে, ৈ, ি) across full consonant clusters.
         """
-        # 1. Reph (র্) repositioning: Moves 'র্' after the target consonant/conjunct
-        # Pattern matches 'র্' followed by standard consonant cluster (including halant + consonants and post-kars/nukta/chandrabindu)
-        reph_pattern = r'র্((?:[ক-হড়-য়](?:্[ক-হড়-য়])*)+(?:[া-ৌ্ঁংঃ]?))'
-        text = re.sub(reph_pattern, r'\1র্', text)
+        # Define Bengali Consonant Cluster Pattern:
+        # Matches base consonant + optional (halant + consonant/ja-phala/ra-phala)
+        cluster = r'(?:[ক-হড়-য়](?:্[ক-হড়-য়ি-ৌ্ঁংঃ])*+)'
 
-        # 2. Pre-Kar (ে, ৈ, ি) repositioning: Moves Pre-Kar after the consonant cluster
-        pre_kar_pattern = r'([েৈি])((?:[ক-হড়-য়](?:্[ক-হড়-য়])*)+)'
-        text = re.sub(pre_kar_pattern, r'\2\1', text)
+        # 1. Move Reph (র্) after the target consonant or conjunct cluster
+        text = re.sub(r'র্(' + cluster + r')', r'\1র্', text)
 
-        # 3. Combine 'ে' + 'া' -> 'ো' and 'ে' + 'ৗ' -> 'ৌ'
+        # 2. Move Pre-Kar (ে, ৈ, ি) after the target consonant or conjunct cluster
+        text = re.sub(r'([েৈি])(' + cluster + r')', r'\2\1', text)
+
+        # 3. Handle double Reph or leftover Reph misplacements
+        text = re.sub(r'র্(' + cluster + r')', r'\1র্', text)
+
+        # 4. Merge 'ে' + 'া' -> 'ো' and 'ে' + 'ৗ' -> 'ৌ'
         text = text.replace('ো', 'ো').replace('ৌ', 'ৌ')
 
         return text
