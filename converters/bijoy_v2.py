@@ -1,7 +1,7 @@
 import re
 
 class StmToUnicodeV2:
-    """Version 2 of STM/ANSI to Unicode Converter Engine (Fixed)"""
+    """Version 2 of STM/ANSI to Unicode Converter Engine (Fixed for Legacy Doc Compatibility)"""
 
     def __init__(self):
         # Pre-conversion cleanup
@@ -103,7 +103,7 @@ class StmToUnicodeV2:
             r'০ঃ': '০:', r'১ঃ': '১:', r'২ঃ': '২:', r'৩ঃ': '৩:', r'৪ঃ': '৪:',
             r'৫ঃ': '৫:', r'৬ঃ': '৬:', r'৭ঃ': '৭:', r'৮ঃ': '৮:', r'৯ঃ': '৯:',
             r' ঃ': ' :', r'\nঃ': '\n:', r']ঃ': ']:', r'\[ঃ': '[:',
-            r'  ': ' ', r'অা': 'আ', r'্‌্‌': '্‌', r'ো': 'ো', r'ো': 'ো', r'ৌ': 'ৌ'
+            r'  ': ' ', r'অা': 'আ', r'্‌্‌': '্‌', r'ো': 'ো', r'ৌ': 'ৌ'
         }
 
     def is_bangla_pre_kar(self, c):
@@ -125,23 +125,23 @@ class StmToUnicodeV2:
     def is_bangla_halant(self, c):
         return c == '্'
 
-    def is_space(self, c):
-        return c in (' ', '\t', '\n', '\r')
-
     def _do_char_map(self, text, char_map):
         for src_key, key_val in char_map.items():
             text = re.sub(src_key, key_val, text)
         return text
 
     def re_arrange_unicode_converted_text(self, text):
+        # 1. Clean up multi-part Kars (ে + া -> ো, ে + ৗ -> ৌ) before shifting positions
+        text = re.sub(r'ে([ক-হ]্[ক-হ]|[ক-হ])া', r'\1ো', text)
+        text = re.sub(r'ে([ক-হ]্[ক-হ]|[ক-হ])ৗ', r'\1ৌ', text)
+
         chars = list(text)
         n = len(chars)
         i = 0
 
         while i < n:
-            # 1. Re-arrange Ref (র্) - when present AFTER a consonant cluster/vowel sign in ANSI
+            # 2. Re-arrange Ref (র্) - Shift Reph (র্) BACK to the beginning of the consonant cluster
             if i < n - 1 and chars[i] == 'র' and chars[i+1] == '্':
-                # Traverse backward to find the start of the consonant cluster
                 j = i - 1
                 while j >= 0:
                     if self.is_bangla_kar(chars[j]):
@@ -165,36 +165,34 @@ class StmToUnicodeV2:
                     i += 2
                     continue
 
-            # 2. Re-arrange Pre-Kar (ে, ৈ, ি)
+            # 3. Re-arrange Pre-Kar (ে, ৈ, ি) - Shift past the full consonant cluster
             if self.is_bangla_pre_kar(chars[i]):
                 kar = chars[i]
                 j = i + 1
                 while j < n and self.is_bangla_banjonborno(chars[j]):
-                    if j + 1 < n and chars[j+1] == '্':
+                    if j + 1 < n and self.is_bangla_halant(chars[j+1]):
                         j += 2
                     else:
                         j += 1
                         break
-                
+
                 if j > i + 1:
                     chars = chars[:i] + chars[i+1:j] + [kar] + chars[j:]
                     n = len(chars)
                     i = j
                     continue
 
-            # 3. Combine "ে" + "া" -> "ো" and "ে" + "ৗ" -> "ৌ"
-            if i < n - 1 and chars[i] == 'ে' and chars[i+1] == 'া':
-                chars[i] = 'ো'
-                del chars[i+1]
-                n -= 1
-            elif i < n - 1 and chars[i] == 'ে' and chars[i+1] == 'ৗ':
-                chars[i] = 'ৌ'
-                del chars[i+1]
-                n -= 1
-
             i += 1
 
-        return "".join(chars)
+        res = "".join(chars)
+
+        # 4. Final post-pass replacement for remaining split kars
+        res = re.sub(r'ে([ক-হ])া', r'\1ো', res)
+        res = re.sub(r'ে([ক-হ])ৗ', r'\1ৌ', res)
+        res = re.sub(r'ে\s*া', 'ো', res)
+        res = re.sub(r'ে\s*ৗ', 'ৌ', res)
+
+        return res
 
     def convert(self, src_string):
         if not src_string:
