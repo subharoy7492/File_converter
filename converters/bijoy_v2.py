@@ -15,7 +15,7 @@ class StmToUnicodeV2:
             r'‡u': 'u‡',
             r'wu': 'uw',
             r' ,': ',',
-            r' \|': r'\|',
+            r' \|': '\|',
             r'\\ ': '',
             r' \\': '',
             r'\\': '',
@@ -45,7 +45,7 @@ class StmToUnicodeV2:
             "Ä": "ঞ্জ", "Å": "ঞ্ঝ", "Æ": "ট্ট", "U¡": "ট্ব",
             "U¥": "ট্ম", "Ç": "ড্ড", "È": "ণ্ট", "É": "ণ্ঠ",
             "−": "ণ্ঢ", "Yœ": "ণ্ণ", "Y¥": "ণ্ম", "Ý": "ন্স",
-            "Ð": "ণ্ড", "š‘": "ন্তু", r"Y\^": "ণ্ব", "Ë¡": "ত্ত্ব",
+            "Ð": "ণ্ড", "š‘": "ন্তু", "Y\\^": "ণ্ব", "Ë¡": "ত্ত্ব",
             "Ë": "ত্ত", "Ì": "ত্থ", "Z¥": "ত্ম", "Zœ": "ত্ন",
             "šÍ¡": "ন্ত্ব", "¯Í¡": "স্ত্ব", "Z¡": "ত্ব", "Î": "ত্র",
             "Z¬": "ত্ল", "_ø": "থ্ল", "_¡": "থ্ব", "›Ø": "ন্দ",
@@ -54,24 +54,24 @@ class StmToUnicodeV2:
             "™£": "দ্ভ্র", "™¢": "দ্ভ", "Ù": "দ্ম", "aœ": "ধ্ন",
             "aŸ": "ধ্ব", "a¥": "ধ্ম", "›U": "ন্ট", "Ú": "ন্ঠ",
             "Û": "ন্ড", "šÍ": "ন্ত", "š¿": "ন্ত্র", "š’": "ন্থ",
-            "›`": "ন্দ", "Ü": "ন্ধ", "bœ": "ন্ন", r"š\^": "ন্ব",
+            "›`": "ন্দ", "Ü": "ন্ধ", "bœ": "ন্ন", "š\\^": "ন্ব",
             "b¥": "ন্ম", "Þ": "প্ট", "ß": "প্ত", "cœ": "প্ন",
             "à": "প্প", "c¥": "প্ম", "cø": "প্ল", "á": "প্স",
             "d¬": "ফ্ল", "â": "ব্জ", "ã": "ব্দ", "ä": "ব্ধ",
             "eŸ": "ব্ব", "eø": "ব্ল", "å": "ভ্র", "f¬": "ভ্ল",
             "¤œ": "ম্ন", "¤ú": "ম্প", "¤c": "ম্প", "ç": "ম্ফ",
-            r"®\^": "ষ্ব", r"¤\^": "ম্ব", "¤¢": "ম্ভ", "¤£": "ম্ভ্র",
+            "®\\^": "ষ্ব", "¤\\^": "ম্ব", "¤¢": "ম্ভ", "¤£": "ম্ভ্র",
             "¤§": "ম্ম", "¤ª": "ম্র", "¤ø": "ম্ল", "¤¬": "ম্ল",
             "é": "ল্ক", "ê": "ল্গ", "ë": "ল্ট", "ì": "ল্ড",
             "í": "ল্প", "î": "ল্ফ", "j¦": "ল্ব", "j¥": "ল্ম",
             "jø": "ল্ল", "ï": "শু", "ð": "শ্চ", "ñ": "শ্ছ",
-            "kœ": "শ্ন", "k¦": "শ্ব", r"k\^": "শ্ব", "k¥": "শ্ম",
+            "kœ": "শ্ন", "k¦": "শ্ব", "k\\^": "শ্ব", "k¥": "শ্ম",
             "kø": "শ্ল", "®‹": "ষ্ক", "®Œ": "ষ্ক্র", "ó": "ষ্ট",
             "ô": "ষ্ঠ", "ò": "ষ্ণ", "®ú": "ষ্প", "®c": "ষ্প",
             "õ": "ষ্ফ", "®§": "ষ্ম", "®ª": "ষ্র", "¯‹": "স্ক",
             "÷": "স্ট", "ö": "স্খ", "¯‘": "স্তু", "¯Í": "স্ত",
             "¯¿": "স্ত্র", "¯’": "স্থ", "mœ": "স্ন", "¯ú": "স্প",
-            "¯c": "স্প", "ù": "স্ফ", r"¯\^": "স্ব", "¯§": "স্ম",
+            "¯c": "স্প", "ù": "স্ফ", "¯\\^": "স্ব", "¯§": "স্ম",
             "¯ª": "স্র", "¯ø": "স্ল", "¯¬": "স্ল", "û": "হু",
             "nè": "হ্ণ", "nŸ": "হ্ব", "ý": "হ্ন", "þ": "হ্ম",
             "n¬": "হ্ল", "ü": "হৃ", "—M": "ড়্গ", "©": "র্",
@@ -86,54 +86,115 @@ class StmToUnicodeV2:
             "d": "ফ", "e": "ব", "f": "ভ", "g": "ম",
             "h": "য", "i": "র", "j": "ল", "k": "শ",
             "l": "ষ", "m": "স", "n": "হ", "o": "ড়",
-            "p": "ঢ়", "q": "য়", "r": "ৎ", r"\$": "৳",
+            "p": "ঢ়", "q": "য়", "r": "ৎ", "\\$": "৳",
             "<<": "঍", ">>": "঎", "v": "া", "w": "ি",
             "x": "ী", "y": "ু", "z": "ু", "~": "ূ",
             "‚": "ূ", "ƒ": "ূ", "„": "ৃ", "æ": "ু",
             "–": "ু", "‡": "ে", "†": "ে", "‰": "ৈ",
-            r"\ˆ": "ৈ", "Š": "ৗ", "Ô": "‘", "Õ": "’",
-            r"\|": "।", r"\\\\": "॥", "Ò": "“", "Ó": "”",
+            "\\ˆ": "ৈ", "Š": "ৗ", "Ô": "‘", "Õ": "’",
+            "\\|": "।", "\\\\": "॥", "Ò": "“", "Ó": "”",
             "s": "ং", "t": "ঃ", "u": "ঁ", "ª": "্র",
             "Ö": "্র", "«": "্র", "¨": "্য", "¦": "্ব",
             "¡": "্ব", "¬": "্ল", "ø": "্ল", "è": "্ন",
-            "œ": "্ন", r"\&": "্", "…": "ৃ"
+            "œ": "্ন", "\\&": "্", "…": "ৃ"
         }
 
         self.post_conversion_map = {
             r'০ঃ': '০:', r'১ঃ': '১:', r'২ঃ': '২:', r'৩ঃ': '৩:', r'৪ঃ': '৪:',
             r'৫ঃ': '৫:', r'৬ঃ': '৬:', r'৭ঃ': '৭:', r'৮ঃ': '৮:', r'৯ঃ': '৯:',
             r' ঃ': ' :', r'\nঃ': '\n:', r']ঃ': ']:', r'\[ঃ': '[:',
-            r'  ': ' ', r'অা': 'আ', r'ো': 'ো', r'ৌ': 'ৌ'
+            r'  ': ' ', r'অা': 'আ', r'্‌্‌': '্‌', r'ো': 'ো', r'ো': 'ো', r'ৌ': 'ৌ'
         }
 
+    def is_bangla_pre_kar(self, c):
+        return c in ('ি', 'ৈ', 'ে')
+
+    def is_bangla_post_kar(self, c):
+        return c in ('া', 'ো', 'ৌ', 'ৗ', 'ু', 'ূ', 'ী', 'ৃ')
+
+    def is_bangla_kar(self, c):
+        return self.is_bangla_pre_kar(c) or self.is_bangla_post_kar(c)
+
+    def is_bangla_banjonborno(self, c):
+        return c in (
+            'ক', 'খ', 'গ', 'ঘ', 'ঙ', 'চ', 'ছ', 'জ', 'ঝ', 'ঞ', 'ট', 'ঠ', 'ড', 'ঢ', 'ণ',
+            'ত', 'থ', 'দ', 'ধ', 'ন', 'প', 'ফ', 'ব', 'ভ', 'ম', 'য', 'র', 'ল', 'শ', 'ষ',
+            'স', 'হ', 'ড়', 'ঢ়', 'য়', 'ৎ', 'ং', 'ঃ', 'ঁ'
+        )
+
+    def is_bangla_halant(self, c):
+        return c == '্'
+
+    def is_space(self, c):
+        return c in (' ', '\t', '\n', '\r')
+
     def _do_char_map(self, text, char_map):
-        # Sort keys by length descending to match multi-char sequences first
-        sorted_map = dict(sorted(char_map.items(), key=lambda x: len(x[0]), reverse=True))
-        for src_key, key_val in sorted_map.items():
+        for src_key, key_val in char_map.items():
             text = re.sub(src_key, key_val, text)
         return text
 
     def re_arrange_unicode_converted_text(self, text):
-        """
-        Fixes position of Reph (র্) and Pre-Kar (ে, ৈ, ি) across full consonant clusters.
-        """
-        # Define Bengali Consonant Cluster Pattern:
-        # Matches base consonant + optional (halant + consonant/ja-phala/ra-phala)
-        cluster = r'(?:[ক-হড়-য়](?:্[ক-হড়-য়ি-ৌ্ঁংঃ])*+)'
+        chars = list(text)
+        n = len(chars)
+        i = 0
 
-        # 1. Move Reph (র্) after the target consonant or conjunct cluster
-        text = re.sub(r'র্(' + cluster + r')', r'\1র্', text)
+        while i < n:
+            # 1. Re-arrange Ref (র্) - when present AFTER a consonant cluster/vowel sign in ANSI
+            if i < n - 1 and chars[i] == 'র' and chars[i+1] == '্':
+                # Traverse backward to find the start of the consonant cluster
+                j = i - 1
+                while j >= 0:
+                    if self.is_bangla_kar(chars[j]):
+                        j -= 1
+                    elif self.is_bangla_banjonborno(chars[j]):
+                        if j - 1 >= 0 and self.is_bangla_halant(chars[j-1]):
+                            j -= 2
+                        else:
+                            break
+                    else:
+                        j += 1
+                        break
+                
+                if j < 0:
+                    j = 0
 
-        # 2. Move Pre-Kar (ে, ৈ, ি) after the target consonant or conjunct cluster
-        text = re.sub(r'([েৈি])(' + cluster + r')', r'\2\1', text)
+                if j < i:
+                    ref = chars[i:i+2]
+                    chars = chars[:j] + ref + chars[j:i] + chars[i+2:]
+                    n = len(chars)
+                    i += 2
+                    continue
 
-        # 3. Handle double Reph or leftover Reph misplacements
-        text = re.sub(r'র্(' + cluster + r')', r'\1র্', text)
+            # 2. Re-arrange Pre-Kar (ে, ৈ, ি)
+            if self.is_bangla_pre_kar(chars[i]):
+                kar = chars[i]
+                j = i + 1
+                while j < n and self.is_bangla_banjonborno(chars[j]):
+                    if j + 1 < n and chars[j+1] == '্':
+                        j += 2
+                    else:
+                        j += 1
+                        break
+                
+                if j > i + 1:
+                    chars = chars[:i] + chars[i+1:j] + [kar] + chars[j:]
+                    n = len(chars)
+                    i = j
+                    continue
 
-        # 4. Merge 'ে' + 'া' -> 'ো' and 'ে' + 'ৗ' -> 'ৌ'
-        text = text.replace('ো', 'ো').replace('ৌ', 'ৌ')
+            # 3. Combine "ে" + "া" -> "ো" and "ে" + "ৗ" -> "ৌ"
+            if i < n - 1 and chars[i] == 'ে' and chars[i+1] == 'া':
+                chars[i] = 'ো'
+                del chars[i+1]
+                n -= 1
+            elif i < n - 1 and chars[i] == 'ে' and chars[i+1] == 'ৗ':
+                chars[i] = 'ৌ'
+                del chars[i+1]
+                n -= 1
 
-        return text
+            i += 1
+
+        return "".join(chars)
 
     def convert(self, src_string):
         if not src_string:
