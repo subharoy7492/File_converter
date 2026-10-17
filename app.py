@@ -21,11 +21,10 @@ logger = logging.getLogger(__name__)
 
 st.set_page_config(
     page_title="ANSI to Unicode Document Converter",
-    page_icon="🔄",
     layout="centered",
 )
 
-# Inject Tailwind CSS via CDN and custom styling for crisp fonts and button colors
+# Inject Tailwind CSS via CDN and custom styling for crisp fonts and exact UI look
 st.markdown(
     """
     <script src="https://cdn.tailwindcss.com"></script>
@@ -35,6 +34,7 @@ st.markdown(
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
             text-rendering: optimizeLegibility;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
         }
 
         /* Hide default Streamlit header/footer branding */
@@ -42,28 +42,31 @@ st.markdown(
         footer {visibility: hidden;}
         header {visibility: hidden;}
         
-        /* Custom styling adjustments for Streamlit widgets to match Tailwind theme */
+        /* Custom styling adjustments for Streamlit widgets to match the reference UI */
         .stSelectbox div[data-baseweb="select"] {
             border-radius: 0.5rem;
             border-color: #cbd5e1;
         }
         .stFileUploader section {
-            border: 2px dashed #cbd5e1 !important;
+            border: 2px dashed #60a5fa !important;
             border-radius: 0.75rem;
             background-color: #f8fafc;
         }
 
-        /* Vibrant Blue styling for Streamlit submit and download buttons */
+        /* Vibrant Blue gradient styling for Streamlit submit and download buttons */
         .stButton button, .stDownloadButton a {
-            background-color: #2563eb !important;
+            background: linear-gradient(to right, #2563eb, #4f46e5) !important;
             color: #ffffff !important;
             font-weight: 600 !important;
             border-radius: 0.75rem !important;
             border: none !important;
-            transition: background-color 0.2s ease-in-out !important;
+            padding: 0.75rem 1rem !important;
+            box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2), 0 2px 4px -1px rgba(37, 99, 235, 0.1);
+            transition: all 0.2s ease-in-out !important;
         }
         .stButton button:hover, .stDownloadButton a:hover {
-            background-color: #1d4ed8 !important;
+            opacity: 0.95 !important;
+            box-shadow: 0 6px 8px -1px rgba(37, 99, 235, 0.3) !important;
         }
     </style>
     """,
@@ -401,16 +404,13 @@ def get_converter_options():
     return options, labels
 
 
-# --- Tailwind Styled UI Header ---
+# --- Clean Minimalist Header Matching Reference UI ---
 st.markdown(
     """
-    <div class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-8 rounded-2xl shadow-lg mb-8 text-center">
-        <div class="inline-flex items-center justify-center bg-white/10 p-3 rounded-full mb-4">
-            <span class="text-3xl">🔄</span>
-        </div>
-        <h1 class="text-3xl font-extrabold tracking-tight mb-2">ANSI to Unicode Document Converter</h1>
-        <p class="text-blue-100 text-base max-w-xl mx-auto">
-            Seamlessly convert ANSI and Bijoy encoded text in Microsoft Word (.docx) and Adobe InDesign (.idml) documents into clean Bengali Unicode.
+    <div class="mb-6">
+        <h1 class="text-2xl font-bold text-slate-900 tracking-tight mb-1">ANSI to Unicode Document Converter</h1>
+        <p class="text-slate-500 text-sm">
+            Convert ANSI documents (.docx, .idml) into Standard Bengali Unicode format effortlessly.
         </p>
     </div>
     """,
@@ -428,16 +428,8 @@ if not converter_options:
     st.stop()
 
 
-# --- Form Container wrapped in a Tailwind Card ---
-st.markdown(
-    """
-    <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm mb-6">
-    """,
-    unsafe_allow_html=True,
-)
-
 with st.form("conversion_form"):
-    st.markdown("<p class='text-slate-800 font-semibold mb-2'>Upload Document (.docx or .idml)</p>", unsafe_allow_html=True)
+    st.markdown("<p class='text-slate-800 font-medium text-sm mb-2'>Upload Document [.docx (Ms-Word) or .idml(InDesign)]</p>", unsafe_allow_html=True)
     uploaded_file = st.file_uploader(
         label="",
         type=["docx", "idml"],
@@ -445,36 +437,47 @@ with st.form("conversion_form"):
         label_visibility="collapsed"
     )
 
-    col1, col2 = st.columns(2)
-    with col1:
-        mapping_version = st.selectbox(
-            "Converter Version",
-            options=converter_options,
-            format_func=lambda option: converter_labels[option],
-        )
-    with col2:
-        target_font = st.selectbox(
-            "Target Font",
-            options=["Vrinda", "Kalpurush", "Shonar Bangla"],
-            index=1,
-        )
+    st.markdown("<p class='text-slate-800 font-medium text-sm mb-1 mt-3'>⚙️ Converter Version</p>", unsafe_allow_html=True)
+    mapping_version = st.selectbox(
+        label="Converter Version",
+        options=converter_options,
+        format_func=lambda option: converter_labels[option],
+        label_visibility="collapsed"
+    )
 
-    keep_english = st.checkbox(
-        "Keep English words and punctuation marks",
-        value=False,
-        help=(
-            "Detected English words are kept unchanged. English text explicitly "
-            "marked in IDML styles is also skipped."
-        ),
+    st.markdown("<p class='text-slate-800 font-medium text-sm mb-1 mt-3'>🔤 Target Font Output</p>", unsafe_allow_html=True)
+    target_font = st.selectbox(
+        label="Target Font Output",
+        options=["Vrinda", "Kalpurush", "Shonar Bangla"],
+        index=1,
+        label_visibility="collapsed"
     )
 
     st.markdown("<div class='mt-4'></div>", unsafe_allow_html=True)
-    submitted = st.form_submit_button(
-        "✨ Convert & Download",
-        use_container_width=True,
+    
+    # Checkbox card container matching reference style
+    st.markdown(
+        """
+        <div class="border border-slate-200 rounded-xl p-4 bg-white mb-4">
+        """,
+        unsafe_allow_html=True,
+    )
+    keep_english = st.checkbox(
+        "Keep English words & punctuation marks",
+        value=False,
+    )
+    st.markdown(
+        """
+        <p class="text-xs text-slate-500 ml-6 -mt-2 mb-1">When checked, detected English words and punctuation remain untouched during conversion.</p>
+        </div>
+        """,
+        unsafe_allow_html=True,
     )
 
-st.markdown("</div>", unsafe_allow_html=True)
+    submitted = st.form_submit_button(
+        "📥 Convert & Download",
+        use_container_width=True,
+    )
 
 
 if submitted:
@@ -561,11 +564,8 @@ if result:
 # --- Footer ---
 st.markdown(
     """
-    <div class="text-center mt-10 mb-6 text-slate-400 text-sm">
-        Powered by 
-        <a href="https://banglaharaf.com" target="_blank" class="text-blue-600 font-medium hover:underline">
-            Bangla Haraf Font Foundry
-        </a>
+    <div class="text-center mt-8 mb-6 text-slate-400 text-sm">
+        Powered by Bangla Haraf Font Foundry
     </div>
     """,
     unsafe_allow_html=True,
