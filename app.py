@@ -25,12 +25,19 @@ st.set_page_config(
     layout="centered",
 )
 
-# Inject Tailwind CSS via CDN and custom styling for Streamlit elements
+# Inject Tailwind CSS via CDN and custom styling for crisp fonts and button colors
 st.markdown(
     """
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Hide default Streamlit header/footer branding for a cleaner look */
+        /* Force crisp font rendering on large/Retina screens to avoid blurring */
+        html, body, [class*="css"] {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
+        }
+
+        /* Hide default Streamlit header/footer branding */
         #MainMenu {visibility: hidden;}
         footer {visibility: hidden;}
         header {visibility: hidden;}
@@ -44,6 +51,19 @@ st.markdown(
             border: 2px dashed #cbd5e1 !important;
             border-radius: 0.75rem;
             background-color: #f8fafc;
+        }
+
+        /* Vibrant Blue styling for Streamlit submit and download buttons */
+        .stButton button, .stDownloadButton a {
+            background-color: #2563eb !important;
+            color: #ffffff !important;
+            font-weight: 600 !important;
+            border-radius: 0.75rem !important;
+            border: none !important;
+            transition: background-color 0.2s ease-in-out !important;
+        }
+        .stButton button:hover, .stDownloadButton a:hover {
+            background-color: #1d4ed8 !important;
         }
     </style>
     """,
@@ -529,15 +549,7 @@ if submitted:
 result = st.session_state.get("conversion_result")
 
 if result:
-    st.markdown(
-        """
-        <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-6 text-center my-6">
-            <h3 class="text-emerald-800 font-bold text-lg mb-2">Ready for Download!</h3>
-            <p class="text-emerald-600 text-sm mb-4">Your document has been successfully converted to Unicode.</p>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    st.markdown("<div class='mb-4'></div>", unsafe_allow_html=True)
     st.download_button(
         label="📥 Download Converted Document",
         data=result["data"],
