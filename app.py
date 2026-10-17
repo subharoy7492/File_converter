@@ -235,7 +235,7 @@ st.markdown("""
 #MainMenu {visibility: hidden;}
 footer {visibility: hidden;}
 header {visibility: hidden;}
-}
+
 @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap');
 :root { --ink:#172554; --blue:#3156d9; --violet:#6d45d9; }
 .stApp {
