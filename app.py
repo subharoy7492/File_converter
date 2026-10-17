@@ -1,195 +1,141 @@
-from __future__ import annotations
-
 import hashlib
 import logging
 import os
+import re
 import shutil
 import tempfile
 import zipfile
 import xml.etree.ElementTree as ET
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 import streamlit as st
 from docx import Document
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 
-from converters import CONVERTERS, get_converter
+from converters import get_available_converters, get_converter
 
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-
-# --- Page Configuration ---
 st.set_page_config(
-    page_title="ANSI Document Converter",
+    page_title="ANSI to Unicode Document Converter",
     page_icon="🔄",
     layout="centered",
-    initial_sidebar_state="collapsed",
 )
 
-# --- Tailwind CSS-Inspired Modern Theme Injections ---
-st.markdown(
-    """
-    <style>
-    /* Google Fonts */
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+ENGLISH_FONTS = {
+    "arial", "calibri", "times new roman", "courier new", "georgia",
+    "verdana", "tahoma", "trebuchet ms", "segoe ui", "helvetica",
+    "garamond", "cambria", "consolas", "impact", "century gothic",
+    "myriad pro",
+}
 
-    html, body, [class*="css"] {
-        font-family: 'Inter', sans-serif;
-    }
-
-    /* Hide top-right Streamlit header (GitHub link, deploy status, menu) */
-    header[data-testid="stHeader"] {
-        display: none !important;
-    }
-
-    /* Main Container Padding - reduced top padding to bring text higher */
-    .block-container {
-        padding-top: 1rem !important;
-        padding-bottom: 3rem;
-        max-width: 720px;
-    }
-
-    /* Header Styling */
-    .app-header {
-        text-align: center;
-        margin-bottom: 2rem;
-    }
-
-    .app-title {
-        font-size: 2.25rem;
-        font-weight: 800;
-        color: #0f172a; /* Tailwind Slate 900 */
-        letter-spacing: -0.025em;
-        margin-bottom: 0.5rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-    }
-
-    .app-subtitle {
-        font-size: 1rem;
-        color: #64748b; /* Tailwind Slate 500 */
-        font-weight: 400;
-    }
-
-    /* Card Wrapper */
-    div[data-testid="stForm"] {
-        background-color: #ffffff;
-        border: 1px solid #e2e8f0; /* Tailwind Slate 200 */
-        border-radius: 12px;
-        padding: 2rem;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-    }
-
-    /* Input Field Labels */
-    label[data-testid="stWidgetLabel"] p {
-        font-weight: 600 !important;
-        color: #334155 !important; /* Tailwind Slate 700 */
-        font-size: 0.875rem !important;
-    }
-
-    /* Primary Submit Button (Tailwind Blue) */
-    div[data-testid="stFormSubmitButton"] button {
-        background-color: #2563eb !important; /* Tailwind Blue 600 */
-        color: #ffffff !important;
-        font-weight: 600 !important;
-        border-radius: 8px !important;
-        border: none !important;
-        padding: 0.625rem 1.25rem !important;
-        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
-        transition: all 0.2s ease-in-out !important;
-    }
-
-    div[data-testid="stFormSubmitButton"] button:hover {
-        background-color: #1d4ed8 !important; /* Tailwind Blue 700 */
-        box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2) !important;
-    }
-
-    /* Download Button (Tailwind Emerald) */
-    div[data-testid="stDownloadButton"] button {
-        background-color: #059669 !important; /* Tailwind Emerald 600 */
-        color: #ffffff !important;
-        font-weight: 600 !important;
-        border-radius: 8px !important;
-        border: none !important;
-        padding: 0.625rem 1.25rem !important;
-        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
-        transition: all 0.2s ease-in-out !important;
-    }
-
-    div[data-testid="stDownloadButton"] button:hover {
-        background-color: #047857 !important; /* Tailwind Emerald 700 */
-        box-shadow: 0 4px 6px -1px rgba(5, 150, 105, 0.2) !important;
-    }
-
-    /* File Uploader Custom Styling */
-    div[data-testid="stFileUploader"] {
-        border-radius: 8px;
-    }
-
-    /* Footer */
-    .app-footer {
-        text-align: center;
-        margin-top: 2.5rem;
-        padding-top: 1.5rem;
-        border-top: 1px solid #f1f5f9; /* Tailwind Slate 100 */
-        font-size: 0.875rem;
-        color: #94a3b8; /* Tailwind Slate 400 */
-    }
-
-    .app-footer span {
-        font-weight: 600;
-        color: #64748b;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True,
+BIJOY_MARKER_CHARS = set(
+    "‡‰ˆþÏØÜÝÞßáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ Žž ¾¼"
 )
 
-ANSI_FONT_KEYWORDS = [
-    "sutonny",
-    "bijoy",
-    "stm",
-    "soumili",
-    "ansi",
-    "bangla",
-    "bengali",
-]
+BIJOY_EXPLICIT_TOKENS = {
+    "xd", "xydy", "rm", "d", "dþ", "d«", "z", "u", "r",
+    "q", "e", "a", "b", "c", "p", "s",
+}
 
-SUPPORTED_EXTENSIONS = ["docx", "idml"]
+FALLBACK_ENGLISH_VOCAB = {
+    "the", "be", "to", "of", "and", "a", "in", "that", "have", "i",
+    "it", "for", "not", "on", "with", "he", "as", "you", "do", "at",
+    "this", "but", "his", "by", "from", "they", "we", "say", "her",
+    "she", "or", "an", "will", "my", "one", "all", "would", "there",
+    "their", "what", "so", "up", "out", "if", "about", "who", "get",
+    "which", "go", "me", "when", "make", "can", "like", "time", "no",
+    "just", "him", "know", "take", "people", "into", "year", "your",
+    "good", "some", "could", "them", "see", "other", "than", "then",
+    "now", "look", "only", "come", "its", "over", "think", "also",
+    "back", "after", "use", "two", "how", "our", "work", "first",
+    "well", "way", "even", "new", "want", "because", "any", "these",
+    "give", "day", "most", "us", "is", "are", "was", "were",
+}
 
 
-def is_ansi_font(font_name: str | None) -> bool:
-    if not font_name:
+@st.cache_resource
+def get_english_vocab() -> set[str]:
+    """Load NLTK vocabulary if its corpora are installed; otherwise use fallback."""
+    try:
+        from nltk.corpus import stopwords, words
+
+        return set(words.words()).union(set(stopwords.words("english")))
+    except (ImportError, LookupError, OSError):
+        return FALLBACK_ENGLISH_VOCAB
+
+
+ENGLISH_VOCAB = get_english_vocab()
+
+
+def is_genuine_english_word(word: str) -> bool:
+    clean = word.lower().strip(".,!?:;\"'()[]{}<>-")
+
+    if not clean:
+        return False
+
+    if clean in BIJOY_EXPLICIT_TOKENS:
+        return False
+
+    if any(char in BIJOY_MARKER_CHARS for char in clean):
+        return False
+
+    if clean.replace(".", "").replace("-", "").isnumeric():
         return True
-    font_lower = str(font_name).lower()
-    return any(keyword in font_lower for keyword in ANSI_FONT_KEYWORDS)
+
+    return clean in ENGLISH_VOCAB
 
 
-def get_run_font_name(run) -> str | None:
-    font_name = run.font.name
-    if font_name:
-        return font_name
+def convert_phrase_stream(full_text, converter_engine, keep_english=True):
+    if not full_text:
+        return full_text
 
-    r_pr = run._element.rPr
-    if r_pr is None or r_pr.rFonts is None:
-        return None
+    if not keep_english:
+        return converter_engine.convert_phrase(full_text)
 
-    r_fonts = r_pr.rFonts
-    for attribute in ("ascii", "hAnsi", "eastAsia", "cs"):
-        value = r_fonts.get(qn(f"w:{attribute}"))
-        if value:
-            return value
+    tokens = re.findall(r"\S+|\s+", full_text)
+    phrases = []
+    current_phrase = []
+    current_is_english = None
 
-    return None
+    for token in tokens:
+        if token.isspace():
+            current_phrase.append(token)
+            continue
+
+        token_is_english = is_genuine_english_word(token)
+
+        if current_is_english is None:
+            current_is_english = token_is_english
+            current_phrase.append(token)
+        elif token_is_english == current_is_english:
+            current_phrase.append(token)
+        else:
+            phrases.append(("".join(current_phrase), current_is_english))
+            current_phrase = [token]
+            current_is_english = token_is_english
+
+    if current_phrase:
+        phrases.append(("".join(current_phrase), current_is_english))
+
+    output = []
+    for phrase_text, is_english in phrases:
+        if is_english:
+            output.append(phrase_text)
+        else:
+            output.append(converter_engine.convert_phrase(phrase_text))
+
+    result = "".join(output)
+    return re.sub(r"([ক-হয়ড়ঢ়ৎ])\s+গু\s+([ক-হয়ড়ঢ়ৎ])", r"\1 = \2", result)
 
 
 def set_run_font(run, target_font: str) -> None:
+    """Set the font name across common Word font mappings."""
     run.font.name = target_font
+
     r_pr = run._element.get_or_add_rPr()
     r_fonts = r_pr.rFonts
 
@@ -201,81 +147,101 @@ def set_run_font(run, target_font: str) -> None:
         r_fonts.set(qn(f"w:{attribute}"), target_font)
 
 
-def process_runs(runs, target_font: str, converter_instance) -> None:
-    for run in runs:
-        if not run.text or not run.text.strip():
-            continue
+def process_paragraph_docx(
+    paragraph,
+    target_font,
+    converter_engine,
+    keep_english,
+):
+    if not paragraph.text or not paragraph.text.strip():
+        return
 
-        font_name = get_run_font_name(run)
+    original_text = paragraph.text
+    converted_text = convert_phrase_stream(
+        original_text,
+        converter_engine,
+        keep_english,
+    )
 
-        if is_ansi_font(font_name):
-            run.text = converter_instance.convert(run.text)
-            set_run_font(run, target_font)
+    if converted_text != original_text and paragraph.runs:
+        # Retain the paragraph's first run and place the converted text there.
+        paragraph.runs[0].text = converted_text
+        set_run_font(paragraph.runs[0], target_font)
+
+        for run in paragraph.runs[1:]:
+            run.text = ""
 
 
-def process_table(table, target_font: str, converter_instance) -> None:
+def process_table_docx(
+    table,
+    target_font,
+    converter_engine,
+    keep_english,
+):
     for row in table.rows:
         for cell in row.cells:
             for paragraph in cell.paragraphs:
-                process_runs(
-                    paragraph.runs,
+                process_paragraph_docx(
+                    paragraph,
                     target_font,
-                    converter_instance,
+                    converter_engine,
+                    keep_english,
                 )
 
             for nested_table in cell.tables:
-                process_table(
+                process_table_docx(
                     nested_table,
                     target_font,
-                    converter_instance,
+                    converter_engine,
+                    keep_english,
                 )
 
 
 def process_docx(
-    input_path: str,
-    output_path: str,
-    target_font: str,
-    converter_instance,
-) -> None:
+    input_path,
+    output_path,
+    target_font,
+    converter_engine,
+    keep_english,
+):
     doc = Document(input_path)
 
     for paragraph in doc.paragraphs:
-        process_runs(
-            paragraph.runs,
+        process_paragraph_docx(
+            paragraph,
             target_font,
-            converter_instance,
+            converter_engine,
+            keep_english,
         )
 
     for table in doc.tables:
-        process_table(
+        process_table_docx(
             table,
             target_font,
-            converter_instance,
+            converter_engine,
+            keep_english,
         )
 
     doc.save(output_path)
 
 
 def safe_extract_zip(zip_file: zipfile.ZipFile, destination: str) -> None:
+    """Extract IDML files while rejecting paths that escape the destination."""
     destination_path = Path(destination).resolve()
 
     for member in zip_file.infolist():
-        member_path = Path(member.filename)
+        member_name = member.filename.replace("\\", "/")
+        relative_path = PurePosixPath(member_name)
 
-        if member_path.is_absolute():
-            raise ValueError("Unsafe IDML archive path detected.")
+        if relative_path.is_absolute() or ".." in relative_path.parts:
+            raise ValueError("Unsafe path found in the IDML archive.")
 
-        target_path = (destination_path / member_path).resolve()
+        target_path = destination_path.joinpath(*relative_path.parts).resolve()
 
-        try:
-            common_path = os.path.commonpath(
-                [str(destination_path), str(target_path)]
-            )
-        except ValueError as exc:
-            raise ValueError("Unsafe IDML archive path detected.") from exc
-
-        if common_path != str(destination_path):
-            raise ValueError("Unsafe IDML archive path detected.")
+        if os.path.commonpath([str(destination_path), str(target_path)]) != str(
+            destination_path
+        ):
+            raise ValueError("Unsafe path found in the IDML archive.")
 
         if member.is_dir():
             target_path.mkdir(parents=True, exist_ok=True)
@@ -288,16 +254,14 @@ def safe_extract_zip(zip_file: zipfile.ZipFile, destination: str) -> None:
 
 
 def process_idml(
-    input_path: str,
-    output_path: str,
-    target_font: str,
-    converter_instance,
-) -> None:
+    input_path,
+    output_path,
+    target_font,
+    converter_engine,
+    keep_english=True,
+):
     extract_dir = f"{input_path}_extracted"
-
-    if os.path.exists(extract_dir):
-        shutil.rmtree(extract_dir)
-
+    shutil.rmtree(extract_dir, ignore_errors=True)
     os.makedirs(extract_dir, exist_ok=True)
 
     try:
@@ -306,48 +270,72 @@ def process_idml(
 
         stories_dir = os.path.join(extract_dir, "Stories")
 
-        if os.path.exists(stories_dir):
+        if os.path.isdir(stories_dir):
             for story_file in os.listdir(stories_dir):
-                if not story_file.endswith(".xml"):
+                if not story_file.lower().endswith(".xml"):
                     continue
 
                 file_path = os.path.join(stories_dir, story_file)
 
                 try:
                     tree = ET.parse(file_path)
-                    root = tree.getroot()
-                    modified = False
-
-                    for element in root.iter():
-                        applied_font = element.attrib.get("AppliedFont", "")
-
-                        if not is_ansi_font(applied_font):
-                            continue
-
-                        if element.tag.endswith("Content") and element.text:
-                            element.text = converter_instance.convert(
-                                element.text
-                            )
-                            modified = True
-
-                        if "AppliedFont" in element.attrib:
-                            element.attrib["AppliedFont"] = target_font
-                            modified = True
-
-                    if modified:
-                        tree.write(
-                            file_path,
-                            encoding="utf-8",
-                            xml_declaration=True,
-                        )
-
                 except ET.ParseError:
-                    logger.warning(
-                        "Skipping invalid XML file: %s",
+                    logger.warning("Skipping invalid IDML XML: %s", file_path)
+                    continue
+
+                root = tree.getroot()
+                file_modified = False
+
+                for range_element in root.iter():
+                    if not range_element.tag.endswith("CharacterStyleRange"):
+                        continue
+
+                    applied_language = range_element.attrib.get(
+                        "AppliedLanguage", ""
+                    ).lower()
+                    applied_font = range_element.attrib.get(
+                        "AppliedFont", ""
+                    ).lower()
+
+                    if keep_english and (
+                        "english" in applied_language
+                        or any(font in applied_font for font in ENGLISH_FONTS)
+                    ):
+                        continue
+
+                    range_modified = False
+
+                    for content_element in range_element.iter():
+                        if (
+                            content_element.tag.endswith("Content")
+                            and content_element.text
+                        ):
+                            original_text = content_element.text
+                            converted_text = convert_phrase_stream(
+                                original_text,
+                                converter_engine,
+                                keep_english,
+                            )
+
+                            if converted_text != original_text:
+                                content_element.text = converted_text
+                                range_modified = True
+
+                    if range_modified:
+                        range_element.attrib["AppliedFont"] = target_font
+                        range_element.attrib["Composer"] = (
+                            "$ID/HL Composer Engine"
+                        )
+                        file_modified = True
+
+                if file_modified:
+                    tree.write(
                         file_path,
+                        encoding="utf-8",
+                        xml_declaration=True,
                     )
 
-        files_to_write = []
+        archive_files = []
 
         for folder_name, _, filenames in os.walk(extract_dir):
             for filename in filenames:
@@ -356,22 +344,19 @@ def process_idml(
                     file_path,
                     extract_dir,
                 ).replace(os.sep, "/")
+                archive_files.append((file_path, archive_name))
 
-                files_to_write.append((file_path, archive_name))
-
-        files_to_write.sort(
-            key=lambda item: (
-                item[1] != "mimetype",
-                item[1],
-            )
+        # IDML expects mimetype first and stored without compression.
+        archive_files.sort(
+            key=lambda item: (item[1] != "mimetype", item[1])
         )
 
         with zipfile.ZipFile(
             output_path,
             "w",
-            zipfile.ZIP_DEFLATED,
+            compression=zipfile.ZIP_DEFLATED,
         ) as zip_out:
-            for file_path, archive_name in files_to_write:
+            for file_path, archive_name in archive_files:
                 if archive_name == "mimetype":
                     zip_out.write(
                         file_path,
@@ -385,144 +370,98 @@ def process_idml(
         shutil.rmtree(extract_dir, ignore_errors=True)
 
 
-def get_converter_name(key: str, converter_info) -> str:
-    if hasattr(converter_info, "name"):
-        return converter_info.name
-
-    if isinstance(converter_info, dict):
-        return converter_info.get("name", key)
-
-    return key
-
-
 def get_converter_options():
-    keys = list(CONVERTERS.keys())
+    available = get_available_converters()
 
-    names = {
-        key: get_converter_name(key, CONVERTERS[key])
-        for key in keys
-    }
+    if isinstance(available, dict):
+        options = list(available.keys())
+        labels = {key: str(available[key]) for key in options}
+    else:
+        options = list(available)
+        labels = {option: str(option) for option in options}
 
-    return keys, names
-
-
-def clear_previous_result() -> None:
-    st.session_state.pop("conversion_result", None)
+    return options, labels
 
 
-# --- Header Section ---
-st.markdown(
-    """
-    <div class="app-header">
-        <div class="app-title">
-            ANSI Document Converter
-        </div>
-        <p class="app-subtitle">Convert legacy Bijoy, STM & Soumili text to Unicode</p>
-    </div>
-    """,
-    unsafe_allow_html=True,
+st.title("ANSI to Unicode Document Converter")
+st.write(
+    "Convert ANSI/Bijoy text in Word and InDesign documents "
+    "to Bengali Unicode."
 )
 
+try:
+    converter_options, converter_labels = get_converter_options()
+except Exception as exc:
+    st.error(f"Could not load converter options: {exc}")
+    st.stop()
 
-converter_keys, converter_names = get_converter_options()
-
-if not converter_keys:
-    st.error("No converter engines were found in converters.py.")
+if not converter_options:
+    st.error("No converters are available. Check your converters.py file.")
     st.stop()
 
 
-default_converter_index = (
-    converter_keys.index("bijoy_v1")
-    if "bijoy_v1" in converter_keys
-    else 0
-)
-
-
-# --- Input Form ---
 with st.form("conversion_form"):
     uploaded_file = st.file_uploader(
-        "Upload Document",
-        type=SUPPORTED_EXTENSIONS,
-        help="Select a .docx or .idml file to process",
+        "Upload a document",
+        type=["docx", "idml"],
+        help="Supported formats: .docx and .idml",
     )
 
-    col1, col2 = st.columns(2)
+    mapping_version = st.selectbox(
+        "Converter Version",
+        options=converter_options,
+        format_func=lambda option: converter_labels[option],
+    )
 
-    with col1:
-        converter_key = st.selectbox(
-            "Converter Engine",
-            options=converter_keys,
-            index=default_converter_index,
-            format_func=lambda key: converter_names[key],
-        )
+    target_font = st.selectbox(
+        "Target Font",
+        options=["Vrinda", "Kalpurush", "Shonar Bangla"],
+        index=1,
+    )
 
-    with col2:
-        target_font = st.selectbox(
-            "Target Font",
-            options=["Kalpurush", "Vrinda"],
-            index=0,
-        )
+    keep_english = st.checkbox(
+        "Keep English words and punctuation marks",
+        value=False,
+        help=(
+            "Detected English words are kept unchanged. English text explicitly "
+            "marked in IDML styles is also skipped."
+        ),
+    )
 
     submitted = st.form_submit_button(
-        "Convert Document",
+        "Convert & Download",
         use_container_width=True,
     )
 
 
-current_signature = None
-file_bytes = None
-
-if uploaded_file is not None:
-    file_bytes = uploaded_file.getvalue()
-
-    current_signature = (
-        hashlib.sha256(file_bytes).hexdigest(),
-        converter_key,
-        target_font,
-    )
-
-    previous_signature = st.session_state.get("source_signature")
-
-    if previous_signature != current_signature:
-        clear_previous_result()
-        st.session_state["source_signature"] = current_signature
-else:
-    clear_previous_result()
-    st.session_state.pop("source_signature", None)
-
-
-# --- Processing Logic ---
 if submitted:
-    if uploaded_file is None or file_bytes is None:
-        st.error("Please select a valid DOCX or IDML file first.")
+    st.session_state.pop("conversion_result", None)
+
+    if uploaded_file is None:
+        st.error("Please upload a DOCX or IDML file.")
         st.stop()
 
-    original_filename = Path(uploaded_file.name).name
-    extension = Path(original_filename).suffix.lower()
+    filename = Path(uploaded_file.name).name
+    extension = Path(filename).suffix.lower()
 
     if extension not in {".docx", ".idml"}:
-        st.error("Unsupported file format.")
+        st.error("Unsupported file format. Upload a DOCX or IDML file.")
         st.stop()
 
     try:
-        converter_instance = get_converter(converter_key)
-    except ValueError as exc:
-        st.error(str(exc))
+        converter_engine = get_converter(mapping_version)
+    except (ValueError, KeyError) as exc:
+        st.error(f"Could not load the selected converter: {exc}")
         st.stop()
+
+    output_filename = f"Unicode_{filename}"
+    file_bytes = uploaded_file.getvalue()
 
     with st.spinner("Converting document..."):
         try:
             with tempfile.TemporaryDirectory() as temp_dir:
-                input_path = os.path.join(
-                    temp_dir,
-                    f"input{extension}",
-                )
-
-                output_filename = f"Unicode_{original_filename}"
-                output_path = os.path.join(
-                    temp_dir,
-                    output_filename,
-                )
+                input_path = os.path.join(temp_dir, f"input{extension}")
+                output_path = os.path.join(temp_dir, output_filename)
 
                 with open(input_path, "wb") as input_file:
                     input_file.write(file_bytes)
@@ -532,19 +471,20 @@ if submitted:
                         input_path,
                         output_path,
                         target_font,
-                        converter_instance,
+                        converter_engine,
+                        keep_english,
                     )
                     mime_type = (
-                        "application/vnd.openxmlformats-"
-                        "officedocument.wordprocessingml.document"
+                        "application/vnd.openxmlformats-officedocument."
+                        "wordprocessingml.document"
                     )
-
-                elif extension == ".idml":
+                else:
                     process_idml(
                         input_path,
                         output_path,
                         target_font,
-                        converter_instance,
+                        converter_engine,
+                        keep_english,
                     )
                     mime_type = "application/vnd.adobe.indesign-idml-package"
 
@@ -556,34 +496,32 @@ if submitted:
                 "filename": output_filename,
                 "mime": mime_type,
             }
-
-            st.toast("Conversion completed!", icon="🎉")
+            st.success("Conversion completed.")
 
         except Exception as exc:
             logger.exception("Document conversion failed")
             st.error(f"Conversion failed: {exc}")
 
 
-# --- Output / Download Action ---
-conversion_result = st.session_state.get("conversion_result")
+result = st.session_state.get("conversion_result")
 
-if conversion_result:
-    st.write("")
+if result:
     st.download_button(
         label="Download Converted Document",
-        data=conversion_result["data"],
-        file_name=conversion_result["filename"],
-        mime=conversion_result["mime"],
+        data=result["data"],
+        file_name=result["filename"],
+        mime=result["mime"],
         use_container_width=True,
     )
 
-
-# --- Footer ---
 st.markdown(
     """
-    <div class="app-footer">
-        Powered by <span>Bangla Haraf Font Foundry</span>
+    <div style="text-align:center; margin-top:1.5rem; font-size:0.9rem">
+        Powered by
+        <a href="https://banglaharaf.com" target="_blank">
+            Bangla Haraf Font Foundry
+        </a>
     </div>
     """,
     unsafe_allow_html=True,
-    )
+)
