@@ -21,7 +21,6 @@ except AttributeError:
 else:
     ssl._create_default_https_context = _create_unverified_https_context
 
-import nltk
 
 try:
     for resource in ["punkt", "punkt_tab", "words", "stopwords"]:
