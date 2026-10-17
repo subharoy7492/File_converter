@@ -235,7 +235,11 @@ st.markdown("""
 #MainMenu {visibility: hidden;}
 footer {visibility: hidden;}
 header {visibility: hidden;}
+</style>
+""", unsafe_allow_html=True)
 
+st.markdown("""
+<style>
 @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap');
 :root { --ink:#172554; --blue:#3156d9; --violet:#6d45d9; }
 .stApp {
@@ -327,7 +331,7 @@ with st.container():
 
     keep_english = st.checkbox(
         "Keep detected English words and punctuation unchanged",
-        value=True,
+        value=False,
         help="English detection follows the vocabulary and ANSI marker rules in your original app. Review mixed-language documents after conversion.",
     )
 
