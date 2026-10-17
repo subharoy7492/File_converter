@@ -25,6 +25,31 @@ st.set_page_config(
     layout="centered",
 )
 
+# Inject Tailwind CSS via CDN and custom styling for Streamlit elements
+st.markdown(
+    """
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Hide default Streamlit header/footer branding for a cleaner look */
+        #MainMenu {visibility: hidden;}
+        footer {visibility: hidden;}
+        header {visibility: hidden;}
+        
+        /* Custom styling adjustments for Streamlit widgets to match Tailwind theme */
+        .stSelectbox div[data-baseweb="select"] {
+            border-radius: 0.5rem;
+            border-color: #cbd5e1;
+        }
+        .stFileUploader section {
+            border: 2px dashed #cbd5e1 !important;
+            border-radius: 0.75rem;
+            background-color: #f8fafc;
+        }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
 ENGLISH_FONTS = {
     "arial", "calibri", "times new roman", "courier new", "georgia",
     "verdana", "tahoma", "trebuchet ms", "segoe ui", "helvetica",
@@ -59,7 +84,6 @@ FALLBACK_ENGLISH_VOCAB = {
 
 @st.cache_resource
 def get_english_vocab() -> set[str]:
-    """Load NLTK vocabulary if its corpora are installed; otherwise use fallback."""
     try:
         from nltk.corpus import stopwords, words
 
@@ -133,7 +157,6 @@ def convert_phrase_stream(full_text, converter_engine, keep_english=True):
 
 
 def set_run_font(run, target_font: str) -> None:
-    """Set the font name across common Word font mappings."""
     run.font.name = target_font
 
     r_pr = run._element.get_or_add_rPr()
@@ -147,12 +170,7 @@ def set_run_font(run, target_font: str) -> None:
         r_fonts.set(qn(f"w:{attribute}"), target_font)
 
 
-def process_paragraph_docx(
-    paragraph,
-    target_font,
-    converter_engine,
-    keep_english,
-):
+def process_paragraph_docx(paragraph, target_font, converter_engine, keep_english):
     if not paragraph.text or not paragraph.text.strip():
         return
 
@@ -164,7 +182,6 @@ def process_paragraph_docx(
     )
 
     if converted_text != original_text and paragraph.runs:
-        # Retain the paragraph's first run and place the converted text there.
         paragraph.runs[0].text = converted_text
         set_run_font(paragraph.runs[0], target_font)
 
@@ -172,12 +189,7 @@ def process_paragraph_docx(
             run.text = ""
 
 
-def process_table_docx(
-    table,
-    target_font,
-    converter_engine,
-    keep_english,
-):
+def process_table_docx(table, target_font, converter_engine, keep_english):
     for row in table.rows:
         for cell in row.cells:
             for paragraph in cell.paragraphs:
@@ -197,13 +209,7 @@ def process_table_docx(
                 )
 
 
-def process_docx(
-    input_path,
-    output_path,
-    target_font,
-    converter_engine,
-    keep_english,
-):
+def process_docx(input_path, output_path, target_font, converter_engine, keep_english):
     doc = Document(input_path)
 
     for paragraph in doc.paragraphs:
@@ -226,7 +232,6 @@ def process_docx(
 
 
 def safe_extract_zip(zip_file: zipfile.ZipFile, destination: str) -> None:
-    """Extract IDML files while rejecting paths that escape the destination."""
     destination_path = Path(destination).resolve()
 
     for member in zip_file.infolist():
@@ -253,13 +258,7 @@ def safe_extract_zip(zip_file: zipfile.ZipFile, destination: str) -> None:
             shutil.copyfileobj(source, target)
 
 
-def process_idml(
-    input_path,
-    output_path,
-    target_font,
-    converter_engine,
-    keep_english=True,
-):
+def process_idml(input_path, output_path, target_font, converter_engine, keep_english=True):
     extract_dir = f"{input_path}_extracted"
     shutil.rmtree(extract_dir, ignore_errors=True)
     os.makedirs(extract_dir, exist_ok=True)
@@ -346,7 +345,6 @@ def process_idml(
                 ).replace(os.sep, "/")
                 archive_files.append((file_path, archive_name))
 
-        # IDML expects mimetype first and stored without compression.
         archive_files.sort(
             key=lambda item: (item[1] != "mimetype", item[1])
         )
@@ -383,10 +381,20 @@ def get_converter_options():
     return options, labels
 
 
-st.title("ANSI to Unicode Document Converter")
-st.write(
-    "Convert ANSI/Bijoy text in Word and InDesign documents "
-    "to Bengali Unicode."
+# --- Tailwind Styled UI Header ---
+st.markdown(
+    """
+    <div class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-8 rounded-2xl shadow-lg mb-8 text-center">
+        <div class="inline-flex items-center justify-center bg-white/10 p-3 rounded-full mb-4">
+            <span class="text-3xl">🔄</span>
+        </div>
+        <h1 class="text-3xl font-extrabold tracking-tight mb-2">ANSI to Unicode Document Converter</h1>
+        <p class="text-blue-100 text-base max-w-xl mx-auto">
+            Seamlessly convert ANSI and Bijoy encoded text in Microsoft Word (.docx) and Adobe InDesign (.idml) documents into clean Bengali Unicode.
+        </p>
+    </div>
+    """,
+    unsafe_allow_html=True,
 )
 
 try:
@@ -400,24 +408,36 @@ if not converter_options:
     st.stop()
 
 
+# --- Form Container wrapped in a Tailwind Card ---
+st.markdown(
+    """
+    <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm mb-6">
+    """,
+    unsafe_allow_html=True,
+)
+
 with st.form("conversion_form"):
+    st.markdown("<p class='text-slate-800 font-semibold mb-2'>Upload Document (.docx or .idml)</p>", unsafe_allow_html=True)
     uploaded_file = st.file_uploader(
-        "Upload a document",
+        label="",
         type=["docx", "idml"],
         help="Supported formats: .docx and .idml",
+        label_visibility="collapsed"
     )
 
-    mapping_version = st.selectbox(
-        "Converter Version",
-        options=converter_options,
-        format_func=lambda option: converter_labels[option],
-    )
-
-    target_font = st.selectbox(
-        "Target Font",
-        options=["Vrinda", "Kalpurush", "Shonar Bangla"],
-        index=1,
-    )
+    col1, col2 = st.columns(2)
+    with col1:
+        mapping_version = st.selectbox(
+            "Converter Version",
+            options=converter_options,
+            format_func=lambda option: converter_labels[option],
+        )
+    with col2:
+        target_font = st.selectbox(
+            "Target Font",
+            options=["Vrinda", "Kalpurush", "Shonar Bangla"],
+            index=1,
+        )
 
     keep_english = st.checkbox(
         "Keep English words and punctuation marks",
@@ -428,10 +448,13 @@ with st.form("conversion_form"):
         ),
     )
 
+    st.markdown("<div class='mt-4'></div>", unsafe_allow_html=True)
     submitted = st.form_submit_button(
-        "Convert & Download",
+        "✨ Convert & Download",
         use_container_width=True,
     )
+
+st.markdown("</div>", unsafe_allow_html=True)
 
 
 if submitted:
@@ -496,7 +519,7 @@ if submitted:
                 "filename": output_filename,
                 "mime": mime_type,
             }
-            st.success("Conversion completed.")
+            st.success("Conversion completed successfully!")
 
         except Exception as exc:
             logger.exception("Document conversion failed")
@@ -506,19 +529,29 @@ if submitted:
 result = st.session_state.get("conversion_result")
 
 if result:
+    st.markdown(
+        """
+        <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-6 text-center my-6">
+            <h3 class="text-emerald-800 font-bold text-lg mb-2">Ready for Download!</h3>
+            <p class="text-emerald-600 text-sm mb-4">Your document has been successfully converted to Unicode.</p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
     st.download_button(
-        label="Download Converted Document",
+        label="📥 Download Converted Document",
         data=result["data"],
         file_name=result["filename"],
         mime=result["mime"],
         use_container_width=True,
     )
 
+# --- Footer ---
 st.markdown(
     """
-    <div style="text-align:center; margin-top:1.5rem; font-size:0.9rem">
-        Powered by
-        <a href="https://banglaharaf.com" target="_blank">
+    <div class="text-center mt-10 mb-6 text-slate-400 text-sm">
+        Powered by 
+        <a href="https://banglaharaf.com" target="_blank" class="text-blue-600 font-medium hover:underline">
             Bangla Haraf Font Foundry
         </a>
     </div>
