@@ -1,0 +1,183 @@
+import re
+
+class BijoyV1Engine:
+    DISPLAY_NAME = "Bijoy Old/Avro Ansi (v1)"
+
+    def __init__(self):
+        # Character-level mappings (Regex special characters escaped)
+        self.conversion_map = {
+            "0": "০", "1": "১", "2": "২", "3": "৩", "4": "৪",
+            "5": "৫", "6": "৬", "7": "৭", "8": "৮", "9": "৯",
+            "i¨": "র‌্য", "ª¨": "্র্য", "²": "ক্ষ্ম", "°": "ক্ক",
+            "±": "ক্ট", "³¡": "ক্ত্ব", "³": "ক্ত", "K¡": "ক্ব",
+            "¯Œ": "স্ক্র", "µ": "ক্র", "¯‹¬": "স্ক্ল", "K¬": "ক্ল",
+            "Kè": "ক্ন", "´": "ক্ম", "¶è": "ক্ষ্ণ", "¶¡": "ক্ষ্ব",
+            "•¶": "ঙ্ক্ষ", "¶": "ক্ষ", "·": "ক্স", "L¡": "খ্ব",
+            "¸": "গু", "º": "গ্দ", "M¦": "গ্ব", "»": "গ্ধ",
+            "Mœ": "গ্ন", "M¥": "গ্ম", "M­": "গ্ল", "N¡": "ঘ্ব",
+            "Nœ": "ঘ্ন", "¼": "ঙ্ক", "•g": "ঙ্ম", "•L": "ঙ্খ",
+            "½": "ঙ্গ", "•N": "ঙ্ঘ", "•": "ক্স", "”Q¡": "চ্ছ্ব",
+            "”Q¦": "চ্ছ্ব", "”P": "চ্চ", "”Q": "চ্ছ", "Q¡": "ছ্ব",
+            "”T": "চ্ঞ", "R": "জ়", "¾¡": "জ্জ্ব", "¾": "জ্জ",
+            "À": "জ্ঝ", "Á": "জ্ঞ", "R¡": "জ্ব", "Â": "ঞ্চ",
+            "Ã": "ঞ্ছ", "Ä": "ঞ্জ", "Å": "ঞ্ঝ", "Æ": "ট্ট",
+            "U¡": "ট্ব", "U¥": "ট্ম", "Ç": "ড্ড", "È": "ণ্ট",
+            "É": "ণ্ঠ", "−": "ণ্ঢ", "Yœ": "ণ্ণ", "Y¥": "ণ্ম",
+            "Ý": "ন্স", "Ê": "ণ্ড", "š‘": "ন্তু", "Y^": "ণ্ব",
+            "Ë¡": "ত্ত্ব", "Ë": "ত্ত", "Ì": "ত্থ", "Zœ": "ত্ন",
+            "Í": "ত্ম", "Z¬": "ত্ল", "š—¡": "ন্ত্ব", "¯—¡": "স্ত্ব",
+            "Z¡": "ত্ব", "Î": "ত্র", "_­": "থ্ল", "_¡": "থ্ব",
+            "›Ø": "ন্দ্ব", "˜M": "দ্গ", "˜N": "দ্ঘ", "Ï¡": "দ্দ্ব",
+            "Ï": "দ্দ", "×¡": "দ্ধ্ব", "×": "দ্ধ", "`œ": "দ্ন",
+            "Ø": "দ্ব", "™£": "দ্ভ্র", "™¢": "দ্ভ", "Ù": "দ্ম",
+            "aœ": "ধ্ন", "aŸ": "ধ্ব", "a¥": "ধ্ম", "›U": "ন্ট",
+            "Ú": "ন্ঠ", "Û": "ন্ড", "šÍ": "ন্ত", "š—": "ন্ত",
+            "š¿": "ন্ত্র", "š’": "ন্থ", "›`": "ন্দ", "Ü": "ন্ধ",
+            "bœ": "ন্ন", "š^": "ন্ব", "b¥": "ন্ম", "Þ": "প্ট",
+            "ß": "প্ত", "cœ": "প্ন", "à": "প্প", "c¥": "প্ম",
+            "c­": "প্ল", "á": "প্স", "d¬": "ফ্ল", "â": "ব্জ",
+            "ã": "ব্দ", "ä": "ব্ধ", "eŸ": "ব্ব", "e­": "ব্ল",
+            "f¬": "ভ্ল", "å": "ভ্র", "æ": "ম্ন", "¤ú": "ম্প",
+            "¤c": "ম্প", "ç": "ম্ফ", "®^": "ষ্ব", "¤^": "ম্ব",
+            "¤¢": "ম্ভ", "¤£": "ম্ভ্র", "¤§": "ম্ম", "¤ª": "ম্র",
+            "¤­": "ম্ল", "¤¬": "ম্ল", "é": "ল্ক", "ê": "ল্গ",
+            "ë": "ল্ট", "ì": "ল্ড", "í": "ল্প", "î": "ল্ফ",
+            "j¦": "ল্ব", "j¥": "ল্ম", "j­": "ল্ল", "ï": "শু",
+            "ð": "শ্চ", "ñ": "শ্ছ", "kœ": "শ্ন", "k¦": "শ্ব",
+            "k^": "শ্ব", "k¥": "শ্ম", "k­": "শ্ল", "®‹": "ষ্ক",
+            "®Œ": "ষ্ক্র", "ó": "ষ্ট", "ô": "ষ্ঠ", "ò": "ষ্ণ",
+            "®ú": "ষ্প", "®c": "ষ্প", "õ": "ষ্ফ", "®§": "ষ্ম",
+            "®ª": "ষ্র", "¯‹": "স্ক", "÷": "স্ট", "ö": "স্খ",
+            "¯—": "স্ত", "¯Í": "স্ত", "¯‘": "স্তু", "¯¿": "স্ত্র",
+            "¯’": "স্থ", "ø": "স্ন", "¯ú": "স্প", "¯c": "স্প",
+            "ù": "স্ফ", "¯^": "স্ব", "¯§": "স্ম", "¯ª": "স্র",
+            "¯­": "স্ল", "¯¬": "স্ল", "û": "হু", "nè": "হ্ণ",
+            "nŸ": "হ্ব", "ý": "হ্ন", "þ": "হ্ম", "n¬": "হ্ল",
+            "ü": "হৃ", "ÿ": "ড়্গ", "©": "র্", "Av": "আ",
+            "A": "অ", "B": "ই", "C": "ঈ", "D": "উ",
+            "E": "ঊ", "F": "ঋ", "G": "এ", "H": "ঐ",
+            "I": "ও", "J": "ঔ", "K": "ক", "L": "খ",
+            "M": "গ", "N": "ঘ", "O": "ঙ", "P": "চ",
+            "Q": "ছ", "R": "জ", "S": "ঝ", "T": "ঞ",
+            "U": "ট", "V": "ঠ", "W": "ড", "X": "ঢ",
+            "Y": "ণ", "Z": "ত", "_": "থ", "`": "দ",
+            "a": "ধ", "b": "ন", "c": "প", "d": "ফ",
+            "e": "ব", "f": "ভ", "g": "ম", "h": "য",
+            "i": "র", "j": "ল", "k": "শ", "l": "ষ",
+            "m": "স", "n": "হ", "o": "ড়", "p": "ঢ়",
+            "q": "য়", "r": "ৎ", "\\$": "৳", "<<": "঍",
+            ">>": "঎", "v": "া", "w": "ি", "x": "ী",
+            "y": "ু", "z": "ু", "~": "ূ", "‚": "ূ",
+            "ƒ": "ূ", "„": "ৃ", "“": "ু", "‡": "ে",
+            "†": "ে", "‰": "ৈ", "\\ˆ": "ৈ", "Š": "ৗ",
+            "Ð": "-", "Ô": "‘", "Õ": "’", "\\|": "।",
+            "\\\\": "॥", "Ò": "“", "Ó": "”", "s": "ং",
+            "t": "ঃ", "u": "ঁ", "ª": "্র", "Ö": "্র",
+            "«": "্র", "¨": "্য", "¦": "্ব", "¡": "্ব",
+            "¬": "্ল", "­": "্ল", "è": "্ন", "œ": "্ন",
+            "\\&": "্", "…": "ৃ"
+        }
+
+        # Sort keys by length descending to match longest sequences first
+        self.sorted_pairs = sorted(self.conversion_map.items(), key=lambda x: len(x[0]), reverse=True)
+
+    def is_bangla_pre_kar(self, c):
+        return c in ('ি', 'ৈ', 'ে')
+
+    def is_bangla_post_kar(self, c):
+        return c in ('া', 'ো', 'ৌ', 'ৗ', 'ু', 'ূ', 'ী', 'ৃ')
+
+    def is_bangla_kar(self, c):
+        return self.is_bangla_pre_kar(c) or self.is_bangla_post_kar(c)
+
+    def is_bangla_banjonborno(self, c):
+        return c in (
+            'ক', 'খ', 'গ', 'ঘ', 'ঙ', 'চ', 'ছ', 'জ', 'ঝ', 'ঞ', 'ট', 'ঠ', 'ড', 'ঢ', 'ণ',
+            'ত', 'থ', 'দ', 'ধ', 'ন', 'প', 'ফ', 'ব', 'ভ', 'ম', 'য', 'র', 'ল', 'শ', 'ষ',
+            'স', 'হ', 'ড়', 'ঢ়', 'য়', 'ৎ', 'ং', 'ঃ', 'ঁ'
+        )
+
+    def is_bangla_halant(self, c):
+        return c == '্'
+
+    def re_arrange_unicode_converted_text(self, text):
+        chars = list(text)
+        n = len(chars)
+        i = 0
+
+        while i < n:
+            # 1. Rearrange Ref (র্)
+            if i < n - 1 and chars[i] == 'র' and chars[i+1] == '্':
+                j = i - 1
+                while j >= 0:
+                    if self.is_bangla_kar(chars[j]):
+                        j -= 1
+                    elif self.is_bangla_banjonborno(chars[j]):
+                        if j - 1 >= 0 and self.is_bangla_halant(chars[j-1]):
+                            j -= 2
+                        else:
+                            break
+                    else:
+                        j += 1
+                        break
+                
+                if j < 0:
+                    j = 0
+
+                if j < i:
+                    ref = chars[i:i+2]
+                    chars = chars[:j] + ref + chars[j:i] + chars[i+2:]
+                    n = len(chars)
+                    i += 2
+                    continue
+
+            # 2. Rearrange Pre-Kar (ে, ৈ, ি)
+            if self.is_bangla_pre_kar(chars[i]):
+                kar = chars[i]
+                j = i + 1
+                while j < n and self.is_bangla_banjonborno(chars[j]):
+                    if j + 1 < n and chars[j+1] == '্':
+                        j += 2
+                    else:
+                        j += 1
+                        break
+                
+                if j > i + 1:
+                    chars = chars[:i] + chars[i+1:j] + [kar] + chars[j:]
+                    n = len(chars)
+                    i = j
+                    continue
+            # 3. Fix Chandrabindu (ঁ) position before Post-Kar
+            if i < n - 1 and chars[i] == 'ঁ' and self.is_bangla_post_kar(chars[i+1]):
+                chars[i], chars[i+1] = chars[i+1], chars[i]
+
+            # 3. Combine "ে" + "া" -> "ো" and "ে" + "ৗ" -> "ৌ"
+            if i < n - 1 and chars[i] == 'ে' and chars[i+1] == 'া':
+                chars[i] = 'ো'
+                del chars[i+1]
+                n -= 1
+            elif i < n - 1 and chars[i] == 'ে' and chars[i+1] == 'ৗ':
+                chars[i] = 'ৌ'
+                del chars[i+1]
+                n -= 1
+
+            i += 1
+
+        return "".join(chars)
+
+    def convert_phrase(self, phrase):
+        if not phrase:
+            return ""
+        
+        # Direct key replacement without global destructive whitespace/formatting regex
+        for src_key, key_val in self.sorted_pairs:
+            if src_key.startswith('\\') and len(src_key) == 2:
+                clean_key = src_key[1:]
+            else:
+                clean_key = src_key
+            
+            if clean_key in phrase:
+                phrase = phrase.replace(clean_key, key_val)
+
+        converted = self.re_arrange_unicode_converted_text(phrase)
+        return converted.replace("অা", "আ").replace("্্", "্")
