@@ -268,7 +268,7 @@ div[data-testid="stFileUploader"] section { border:1.5px dashed #aab8e9;
   border-radius:15px; background:#f8faff; }
 div[data-testid="stFileUploader"] section small { color:#64748b; }
 .stButton > button, .stDownloadButton > button {
-  border:0; border-radius:12px; min-height:46px; font-weight:750;
+  border:0; border-radius:12px; min-height:46px; font-weight:700;
   background:linear-gradient(100deg,#3156d9,#7047dc); color:white;
   box-shadow:0 7px 16px rgba(79,70,229,.18); transition:transform .15s ease;
 }
