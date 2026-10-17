@@ -287,9 +287,8 @@ hr { border-color:#e7eaf2; }
 
 st.markdown("""
 <div class="hero">
-  <div class="eyebrow">Bangla Haraf Font Foundry · Document Tools</div>
   <h1>ANSI → Unicode<br>Document Converter</h1>
-  <p>Convert Bijoy/ANSI Bengali text in Microsoft Word and InDesign documents to standard Unicode Bengali, with control over mapping version, output font, and English text preservation.</p>
+  <p>Convert All Old ANSI Bengali text in Microsoft Word and InDesign documents to standard Unicode Bengali.</p>
 </div>
 """, unsafe_allow_html=True)
 
@@ -301,7 +300,7 @@ except Exception as exc:
     st.stop()
 
 with st.container():
-    st.markdown('<div class="panel-title">① Upload your document</div><div class="panel-sub">Supported formats: Microsoft Word (.docx) and Adobe InDesign (.idml)</div>', unsafe_allow_html=True)
+    st.markdown('<div class="panel-title">📤 Upload your document</div><div class="panel-sub">Supported formats: Microsoft Word (.docx) and Adobe InDesign (.idml)</div>', unsafe_allow_html=True)
     uploaded = st.file_uploader(
         "Choose a .docx or .idml file",
         type=["docx", "idml"],
@@ -330,7 +329,7 @@ with st.container():
 
     st.markdown('<div class="note">Tip: If English words are being converted incorrectly, try switching this option off/on and compare the output. Complex InDesign layouts should always be checked in InDesign after conversion.</div>', unsafe_allow_html=True)
     st.write("")
-    convert_clicked = st.button("✨ Convert document", use_container_width=True, disabled=(uploaded is None))
+    convert_clicked = st.button("✨ Convert document", use_container_width=True)
 
 if convert_clicked and uploaded is not None:
     ext = Path(uploaded.name).suffix.lower()
