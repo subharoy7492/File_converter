@@ -21,20 +21,21 @@ logger = logging.getLogger(__name__)
 
 st.set_page_config(
     page_title="ANSI to Unicode Document Converter",
+    page_icon="🔄",
     layout="centered",
 )
 
-# Inject Tailwind CSS via CDN and custom styling for crisp fonts and exact UI look
+# Inject Tailwind CSS via CDN and custom rules for crisp rendering on big screens & vibrant buttons
 st.markdown(
     """
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Force crisp font rendering on large/Retina screens to avoid blurring */
+        /* Force ultra-crisp font and vector rendering on large/Retina screens to eliminate any blurriness */
         html, body, [class*="css"] {
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
-            text-rendering: optimizeLegibility;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            text-rendering: geometricPrecision;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         }
 
         /* Hide default Streamlit header/footer branding */
@@ -42,7 +43,7 @@ st.markdown(
         footer {visibility: hidden;}
         header {visibility: hidden;}
         
-        /* Custom styling adjustments for Streamlit widgets to match the reference UI */
+        /* Custom styling adjustments for Streamlit widgets to match exact reference UI */
         .stSelectbox div[data-baseweb="select"] {
             border-radius: 0.5rem;
             border-color: #cbd5e1;
@@ -53,20 +54,21 @@ st.markdown(
             background-color: #f8fafc;
         }
 
-        /* Vibrant Blue gradient styling for Streamlit submit and download buttons */
+        /* Attractive, rich blue gradient styling for ALL primary buttons (Convert & Download) */
         .stButton button, .stDownloadButton a {
-            background: linear-gradient(to right, #2563eb, #4f46e5) !important;
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
             color: #ffffff !important;
             font-weight: 600 !important;
             border-radius: 0.75rem !important;
             border: none !important;
             padding: 0.75rem 1rem !important;
-            box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2), 0 2px 4px -1px rgba(37, 99, 235, 0.1);
-            transition: all 0.2s ease-in-out !important;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+            transition: all 0.25s ease-in-out !important;
         }
         .stButton button:hover, .stDownloadButton a:hover {
-            opacity: 0.95 !important;
-            box-shadow: 0 6px 8px -1px rgba(37, 99, 235, 0.3) !important;
+            background: linear-gradient(135deg, #1d4ed8 100%, #1e40af 100%) !important;
+            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.5) !important;
+            transform: translateY(-1px);
         }
     </style>
     """,
@@ -404,7 +406,7 @@ def get_converter_options():
     return options, labels
 
 
-# --- Clean Minimalist Header Matching Reference UI ---
+# --- Clean Minimalist Header ---
 st.markdown(
     """
     <div class="mb-6">
