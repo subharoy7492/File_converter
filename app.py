@@ -335,9 +335,9 @@ with st.container():
         help="English detection follows the vocabulary and ANSI marker rules in your original app. Review mixed-language documents after conversion.",
     )
 
-    st.markdown('<div class="note">Tip: If English words are being converted incorrectly, try switching this option off/on and compare the output. Complex InDesign layouts should always be checked in InDesign after conversion.</div>', unsafe_allow_html=True)
+    st.markdown('<div class="note">Tip: If English words are being converted incorrectly, try switching this option off/on and compare the output. Complex layouts should always be checked after conversion.</div>', unsafe_allow_html=True)
     st.write("")
-    convert_clicked = st.button("🔄 Convert document", use_container_width=True)
+    convert_clicked = st.button("⟳ Convert Document", use_container_width=True)
 
 if convert_clicked and uploaded is not None:
     ext = Path(uploaded.name).suffix.lower()
