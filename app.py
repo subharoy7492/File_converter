@@ -295,7 +295,7 @@ hr { border-color:#e7eaf2; }
 
 st.markdown("""
 <div class="hero">
-  <h1>ANSI → Unicode<br>Document Converter</h1>
+  <h1>ANSI → Unicode Document Converter</h1>
   <p>Convert All Old ANSI Bengali text in Microsoft Word and InDesign documents to standard Unicode Bengali.</p>
 </div>
 """, unsafe_allow_html=True)
@@ -318,7 +318,7 @@ with st.container():
     left, right = st.columns(2, gap="medium")
     with left:
         mapping_version = st.selectbox(
-            "Converter / mapping version",
+            "Converter Version",
             options=converter_names,
             help="Select the mapping version available in your converters module.",
         )
@@ -337,7 +337,7 @@ with st.container():
 
     st.markdown('<div class="note">Tip: If English words are being converted incorrectly, try switching this option off/on and compare the output. Complex layouts should always be checked after conversion.</div>', unsafe_allow_html=True)
     st.write("")
-    convert_clicked = st.button("⟳ Convert Document", use_container_width=True)
+    convert_clicked = st.button("🔄 Convert Document", use_container_width=True)
 
 if convert_clicked and uploaded is not None:
     ext = Path(uploaded.name).suffix.lower()
