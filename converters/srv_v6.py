@@ -1,5 +1,5 @@
 class TOPV6Engine:
-    DISPLAY_NAME = "Top Type/Srv Bangla (v6)"
+    DISPLAY_NAME = "Top Type/Samit/Srv Bangla (v6)"
 
     def __init__(self):
         # Character-level mappings (Regex special characters escaped) extracted from HTML ANSI mapping
