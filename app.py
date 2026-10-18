@@ -225,7 +225,7 @@ def process_idml(input_path, output_path, target_font, converter_engine=None, ke
 # ----------------------------- Streamlit UI ----------------------------------
 st.set_page_config(
     page_title="Bangla Haraf | ANSI to Unicode Converter",
-    page_icon="🔤",
+    page_icon="🔄",
     layout="centered",
     initial_sidebar_state="collapsed",
 )
@@ -337,7 +337,7 @@ with st.container():
 
     st.markdown('<div class="note">Tip: If English words are being converted incorrectly, try switching this option off/on and compare the output. Complex InDesign layouts should always be checked in InDesign after conversion.</div>', unsafe_allow_html=True)
     st.write("")
-    convert_clicked = st.button("✨ Convert document", use_container_width=True)
+    convert_clicked = st.button("🔄 Convert document", use_container_width=True)
 
 if convert_clicked and uploaded is not None:
     ext = Path(uploaded.name).suffix.lower()
