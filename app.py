@@ -220,13 +220,11 @@ def process_idml(input_path, output_path, target_font, converter_engine=None, ke
         shutil.rmtree(extract_dir)
 
 
-
-
 # ----------------------------- Streamlit UI ----------------------------------
 st.set_page_config(
     page_title="Bangla Haraf | ANSI to Unicode Converter",
     page_icon="🔄",
-    layout="centered",
+    layout="wide",
     initial_sidebar_state="collapsed",
 )
 
@@ -241,62 +239,143 @@ header {visibility: hidden;}
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap');
-:root { --ink:#172554; --blue:#3156d9; --violet:#6d45d9; }
-.stApp {
-  background:
-    radial-gradient(ellipse at 8% 0%, rgba(99,102,241,.15), transparent 34%),
-    radial-gradient(ellipse at 100% 8%, rgba(14,165,233,.12), transparent 28%),
-    #f5f7fc;
-  color: #172033;
-  font-family: Inter, 'Hind Siliguri', sans-serif;
+
+.block-container { 
+    max-width: 1100px; 
+    padding-top: 2.5rem; 
+    padding-bottom: 3rem; 
+    font-family: Inter, 'Hind Siliguri', sans-serif;
+    color: #0f172a;
 }
-.block-container { max-width: 860px; padding-top: 2.2rem; padding-bottom: 2.5rem; }
+
 .hero {
-  background: linear-gradient(125deg, #172554 0%, #3730a3 52%, #6d45d9 100%);
-  border-radius: 25px; padding: 28px 30px 26px; color: white;
-  box-shadow: 0 18px 48px rgba(49, 46, 129, .22); margin-bottom: 22px;
-  position: relative; overflow: hidden;
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  border-radius: 20px; 
+  padding: 36px 40px; 
+  color: white;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12); 
+  margin-bottom: 28px;
+  position: relative; 
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
-.hero:after { content:'অ আ ক খ'; position:absolute; right:18px; bottom:-12px;
-  font-family:'Hind Siliguri',sans-serif; font-size:46px; font-weight:700;
-  color:rgba(255,255,255,.10); letter-spacing:5px; }
-.eyebrow { text-transform:uppercase; letter-spacing:2px; font-size:11px;
-  font-weight:800; color:#c7d2fe; margin-bottom:9px; }
-.hero h1 { font-size:clamp(25px,4vw,36px); line-height:1.15; margin:0 0 10px;
-  color:white; font-weight:800; }
-.hero p { margin:0; max-width:610px; color:#e0e7ff; font-size:14px; line-height:1.7; }
-.panel {
-  background:rgba(255,255,255,.94); border:1px solid #e4e8f2;
-  border-radius:20px; padding:22px 24px; margin-bottom:16px;
-  box-shadow:0 7px 25px rgba(26, 42, 85, .045);
+
+.hero h1 { 
+  font-size: clamp(28px, 3.5vw, 40px); 
+  line-height: 1.2; 
+  margin: 0 0 12px;
+  color: #ffffff; 
+  font-weight: 800; 
 }
-.panel-title { font-size:16px; font-weight:800; color:#1e2a54; margin-bottom:4px; }
-.panel-sub { color:#73809a; font-size:12px; margin-bottom:17px; }
-div[data-testid="stFileUploader"] section { border:1.5px dashed #aab8e9;
-  border-radius:15px; background:#f8faff; }
-div[data-testid="stFileUploader"] section small { color:#64748b; }
+
+.hero p { 
+  margin: 0; 
+  max-width: 750px; 
+  color: #cbd5e1; 
+  font-size: 16px; 
+  line-height: 1.6; 
+}
+
+.panel-title { 
+  font-size: 18px; 
+  font-weight: 700; 
+  color: #0f172a; 
+  margin-bottom: 6px; 
+}
+
+.panel-sub { 
+  color: #475569; 
+  font-size: 14px; 
+  margin-bottom: 20px; 
+}
+
+div[data-testid="stFileUploader"] section { 
+  border: 2px dashed #cbd5e1; 
+  border-radius: 14px; 
+  background: #f8fafc; 
+  padding: 24px;
+}
+
+div[data-testid="stFileUploader"] section small, 
+div[data-testid="stFileUploader"] section span { 
+  color: #334155 !important; 
+  font-size: 14px !important;
+}
+
 .stButton > button, .stDownloadButton > button {
-  border:0; border-radius:12px; min-height:46px; font-weight:700;
-  background:linear-gradient(100deg,#3156d9,#7047dc); color:white;
-  box-shadow:0 7px 16px rgba(79,70,229,.18); transition:transform .15s ease;
+  border: 0; 
+  border-radius: 12px; 
+  min-height: 50px; 
+  font-weight: 700;
+  font-size: 16px;
+  background: linear-gradient(100deg, #2563eb, #4f46e5); 
+  color: white;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25); 
+  transition: all 0.2s ease;
+  width: 100%;
 }
+
 .stButton > button:hover, .stDownloadButton > button:hover {
-  color:white; transform:translateY(-1px); border:0;
+  color: white; 
+  transform: translateY(-2px); 
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.35);
 }
-div[data-baseweb="select"] > div { border-radius:11px; border-color:#dce2f0; }
-div[data-testid="stCheckbox"] { background:#f7f8ff; padding:12px 14px; border-radius:12px; }
-.note { background:#eef2ff; color:#39477a; padding:12px 14px; border-radius:12px;
-  font-size:12px; line-height:1.6; border:1px solid #dfe5ff; }
-.footer { text-align:center; color:#8791a8; font-size:12px; padding:14px 0 4px; }
-.footer a { color:#4f46e5; font-weight:700; text-decoration:none; }
-hr { border-color:#e7eaf2; }
+
+div[data-baseweb="select"] > div { 
+  border-radius: 10px; 
+  border-color: #cbd5e1; 
+  background-color: #ffffff;
+}
+
+div[data-testid="stCheckbox"] { 
+  background: #f8fafc; 
+  padding: 16px 18px; 
+  border-radius: 12px; 
+  border: 1px solid #e2e8f0;
+}
+
+div[data-testid="stCheckbox"] label span {
+  color: #0f172a !important;
+  font-weight: 500;
+  font-size: 15px;
+}
+
+.note { 
+  background: #eff6ff; 
+  color: #1e40af; 
+  padding: 16px 18px; 
+  border-radius: 12px;
+  font-size: 14px; 
+  line-height: 1.6; 
+  border: 1px solid #bfdbfe; 
+  margin-top: 16px;
+  margin-bottom: 16px;
+}
+
+.footer { 
+  text-align: center; 
+  color: #64748b; 
+  font-size: 14px; 
+  padding: 24px 0 8px; 
+}
+
+.footer a { 
+  color: #2563eb; 
+  font-weight: 700; 
+  text-decoration: none; 
+}
+
+hr { 
+  border-color: #e2e8f0; 
+  margin: 32px 0;
+}
 </style>
 """, unsafe_allow_html=True)
 
 st.markdown("""
 <div class="hero">
   <h1>ANSI → Unicode Document Converter</h1>
-  <p>Convert All Old ANSI Bengali text in Microsoft Word and InDesign documents to standard Unicode Bengali.</p>
+  <p>Convert all old ANSI Bengali text in Microsoft Word (.docx) and Adobe InDesign (.idml) documents seamlessly to standard Unicode Bengali.</p>
 </div>
 """, unsafe_allow_html=True)
 
@@ -313,9 +392,11 @@ with st.container():
         "Choose a .docx or .idml file",
         type=["docx", "idml"],
         help="Your original file is not modified. A converted copy will be created for download.",
+        label_visibility="collapsed"
     )
 
-    left, right = st.columns(2, gap="medium")
+    st.write("")
+    left, right = st.columns(2, gap="large")
     with left:
         mapping_version = st.selectbox(
             "Converter Version",
@@ -329,13 +410,14 @@ with st.container():
             index=1,
         )
 
+    st.write("")
     keep_english = st.checkbox(
         "Keep detected English words and punctuation unchanged",
         value=False,
         help="English detection follows the vocabulary and ANSI marker rules in your original app. Review mixed-language documents after conversion.",
     )
 
-    st.markdown('<div class="note">Tip: If English words are being converted incorrectly, try switching this option off/on and compare the output. Complex layouts should always be checked after conversion.</div>', unsafe_allow_html=True)
+    st.markdown('<div class="note"><b>Tip:</b> If English words are being converted incorrectly, try switching this option off/on and compare the output. Complex layouts should always be checked after conversion.</div>', unsafe_allow_html=True)
     st.write("")
     convert_clicked = st.button("🔄 Convert Document", use_container_width=True)
 
