@@ -359,7 +359,6 @@ div[data-testid="stCheckbox"] label span {
   text-align: center; 
   color: #64748b; 
   font-size: 14px; 
-  padding: 4px 0 4px; 
 }
 
 .footer a { 
