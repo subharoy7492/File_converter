@@ -253,7 +253,7 @@ html, body, .stApp, .panel-title, button, input, textarea, label, p, h1, h2, h3 
 .hero {
   background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
   border-radius: 20px; 
-  padding: 16px 20px; 
+  padding: 12px 18px; 
   color: white;
   box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12); 
   margin-bottom: 28px;
@@ -279,7 +279,6 @@ html, body, .stApp, .panel-title, button, input, textarea, label, p, h1, h2, h3 
 }
 
 .panel-title { 
-  font-size: 18px;
   color: #0f172a; 
   margin-bottom: 6px; 
 }
