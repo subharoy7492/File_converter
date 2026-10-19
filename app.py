@@ -249,6 +249,9 @@ html, body, .stApp, .panel-title, button, input, textarea, label, p, h1, h2, h3 
     padding-bottom: 1rem; 
     color: #0f172a;
 }
+.st-emotion-cache-ty2k1r {
+    gap: 2rem;!important;
+}
 
 .hero {
   background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
