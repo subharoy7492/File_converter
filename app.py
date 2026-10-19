@@ -249,9 +249,9 @@ st.markdown("""
 }
 
 .hero {
-  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
   border-radius: 20px; 
-  padding: 36px 40px; 
+  padding: 24px 30px; 
   color: white;
   box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12); 
   margin-bottom: 28px;
