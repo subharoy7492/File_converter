@@ -4,6 +4,7 @@ from .bijoy_v1 import BijoyV1Engine
 from .perfect_v4 import PerfectV4Engine
 from .perfect_v5 import PerfectV5Engine
 from .srv_v6 import TOPV6Engine
+from .leap_v7 import LeapV7Engine
 
 # Register all engine instances by their DISPLAY_NAME
 CONVERTERS = {
@@ -13,6 +14,7 @@ CONVERTERS = {
     PerfectV4Engine.DISPLAY_NAME: PerfectV4Engine(),
     PerfectV5Engine.DISPLAY_NAME: PerfectV5Engine(),
     TOPV6Engine.DISPLAY_NAME: TOPV6Engine(),
+    LeapV7Engine.DISPLAY_NAME: LeapV7Engine(),
 }
 
 def get_available_converters():
