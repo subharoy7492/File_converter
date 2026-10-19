@@ -245,8 +245,8 @@ html, body, .stApp, button, input, textarea, label, p, h1, h2, h3 { font-family:
 
 .block-container { 
     max-width: 1100px; 
-    padding-top: 2rem; 
-    padding-bottom: 2rem; 
+    padding-top: 1rem; 
+    padding-bottom: 1rem; 
     color: #0f172a;
 }
 
@@ -279,7 +279,8 @@ html, body, .stApp, button, input, textarea, label, p, h1, h2, h3 { font-family:
 }
 
 .panel-title { 
-  font-size: 18px;  
+  font-size: 18px;
+  font-weight: 700;
   color: #0f172a; 
   margin-bottom: 6px; 
 }
