@@ -238,10 +238,13 @@ header {visibility: hidden;}
 
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Anek+Bangla:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap');
-body {
+@import url('https://fonts.googleapis.com/css2?family=Anek+Bangla:wght@400;500;600;700&display=swap');
+
+/* Overriding Streamlit default font (Source Sans Pro) globally */
+html, body, [class*="css"] {
     font-family: 'Anek Bangla', sans-serif !important;
 }
+
 .block-container { 
     max-width: 1100px; 
     padding-top: 2rem; 
