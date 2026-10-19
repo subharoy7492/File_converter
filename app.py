@@ -239,12 +239,13 @@ header {visibility: hidden;}
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap');
-
+body {
+    font-family: 'Hind Siliguri', sans-serif;
+}
 .block-container { 
     max-width: 1100px; 
-    padding-top: 2.5rem; 
-    padding-bottom: 3rem; 
-    font-family: 'Hind Siliguri', sans-serif;
+    padding-top: 2rem; 
+    padding-bottom: 2rem; 
     color: #0f172a;
 }
 
