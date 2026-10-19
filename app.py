@@ -238,11 +238,11 @@ header {visibility: hidden;}
 
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Anek+Bangla:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap');
 
 /* Overriding Streamlit default font (Source Sans Pro) globally */
 html, body, [class*="st-emotion-cache"] {
-    font-family: 'Anek Bangla', sans-serif !important;
+    font-family: 'Hind Siliguri', sans-serif !important;
 }
 
 .block-container { 
@@ -281,8 +281,7 @@ html, body, [class*="st-emotion-cache"] {
 }
 
 .panel-title { 
-  font-size: 18px; 
-  font-weight: 700; 
+  font-size: 18px;  
   color: #0f172a; 
   margin-bottom: 6px; 
 }
