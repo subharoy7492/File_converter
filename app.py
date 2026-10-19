@@ -273,14 +273,13 @@ html, body, .stApp, .panel-title, button, input, textarea, label, p, h1, h2, h3 
 .hero p { 
   margin: 0; 
   max-width: 750px; 
-  color: #cbd5e1; 
+  color: #F5F5F5; 
   font-size: 16px; 
   line-height: 1.6; 
 }
 
 .panel-title { 
   font-size: 18px;
-  font-weight: 700;
   color: #0f172a; 
   margin-bottom: 6px; 
 }
