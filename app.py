@@ -241,7 +241,7 @@ st.markdown("""
 @import url('https://fonts.googleapis.com/css2?family=Anek+Bangla:wght@400;500;600;700&display=swap');
 
 /* Overriding Streamlit default font (Source Sans Pro) globally */
-html, body, [class*="css"] {
+html, body, [class*="st-emotion-cache"] {
     font-family: 'Anek Bangla', sans-serif !important;
 }
 
