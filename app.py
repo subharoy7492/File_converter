@@ -244,14 +244,14 @@ st.markdown("""
     max-width: 1100px; 
     padding-top: 2.5rem; 
     padding-bottom: 3rem; 
-    font-family: Inter, 'Hind Siliguri', sans-serif;
+    font-family: 'Hind Siliguri', sans-serif;
     color: #0f172a;
 }
 
 .hero {
   background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
   border-radius: 20px; 
-  padding: 20px 24px; 
+  padding: 16px 20px; 
   color: white;
   box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12); 
   margin-bottom: 28px;
