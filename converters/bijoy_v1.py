@@ -75,7 +75,7 @@ class BijoyV1Engine:
             "t": "ঃ", "u": "ঁ", "ª": "্র", "Ö": "্র",
             "«": "্র", "¨": "্য", "¦": "্ব", "¡": "্ব",
             "¬": "্ল", "­": "্ল", "è": "্ন", "œ": "্ন",
-            "\\&": "্", "…": "ৃ"
+            "\\&": "্", "…": "ৃ","y¨": "্যু"
         }
 
         # Sort keys by length descending to match longest sequences first
