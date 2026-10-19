@@ -240,7 +240,7 @@ st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap');
 body {
-    font-family: 'Hind Siliguri', sans-serif;
+    font-family: 'Hind Siliguri', sans-serif;!important
 }
 .block-container { 
     max-width: 1100px; 
