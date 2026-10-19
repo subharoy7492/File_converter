@@ -414,7 +414,7 @@ with st.container():
 
     st.write("")
     keep_english = st.checkbox(
-        "Keep detected English words and punctuation unchanged",
+        "Keep detected English words and numbers unchanged",
         value=False,
         help="English detection follows the vocabulary and ANSI marker rules in your original app. Review mixed-language documents after conversion.",
     )
