@@ -1,9 +1,11 @@
 ANSI to Unicode Document Converter
 
 A simple and lightweight web application built with Streamlit that converts ANSI text in documents or legacy ANSI character encodings into standard Unicode format.
+
 🚀 Live Demo
 
 Check out the live application here: https://ansitounicode.streamlit.app/
+
 ✨ Features
 
     Instant Conversion: Quickly transform ANSI-formatted text into clean Unicode text.
@@ -17,6 +19,7 @@ Check out the live application here: https://ansitounicode.streamlit.app/
     Python
 
     Streamlit (for the web framework and user interface)
+    
 
 🤝 Contributing
 
