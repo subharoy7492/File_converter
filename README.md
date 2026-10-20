@@ -1,4 +1,4 @@
-ANSI to Unicode Document Converter
+**ANSI to Unicode Document Converter**
 
 A simple and lightweight web application built with Streamlit that converts ANSI text in documents or legacy ANSI character encodings into standard Unicode format.
 
@@ -24,6 +24,7 @@ Check out the live application here: https://ansitounicode.streamlit.app/
 🤝 Contributing
 
 Contributions, issues, and feature requests are welcome! Feel free to check the issues page.
+
 📝 License
 
 This project is open-source and available under the MIT License.
