@@ -23,12 +23,19 @@ Check out the live application here: https://ansitounicode.streamlit.app/
 ℹ️ **Supported Encodings**
 
 Bijoy Old / Avro Ansi
+
 Bijoy New ANSI
+
 STM/Soumili Bangla
+
 Perfect Typist Old Post Script Font
+
 Perfect Typist New Ttf Font
+
 Samit/SRV Bangla/Top Type ANSI
+
 Leap Office
+
 Adarshalipi/Prashika/Bangla Word ANSI
     
 
