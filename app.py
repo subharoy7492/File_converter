@@ -423,6 +423,23 @@ with st.container():
     st.write("")
     convert_clicked = st.button("🔄 Convert Document", use_container_width=True)
 
+# Define the popup dialog window using Streamlit's dialog feature
+@st.dialog("🎉 Conversion Successful!")
+def show_download_popup(output_filename, converted_bytes, ext):
+    st.success("Your document has been converted successfully!")
+    st.markdown(f"📄 **Converted file:** `{output_filename}`")
+    st.write("")
+    st.download_button(
+        label="⬇️ Download Converted Document",
+        data=converted_bytes,
+        file_name=output_filename,
+        mime=("application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+              if ext == ".docx" else "application/vnd.adobe.indesign-idml-package"),
+        use_container_width=True,
+    )
+    st.write("")
+    st.caption("Please proofread Bengali conjuncts, matras, and mixed English/Bengali text before publishing.")
+
 if convert_clicked and uploaded is not None:
     ext = Path(uploaded.name).suffix.lower()
     if ext not in {".docx", ".idml"}:
@@ -449,18 +466,9 @@ if convert_clicked and uploaded is not None:
             with open(output_path, "rb") as f:
                 converted_bytes = f.read()
 
-            st.success("Conversion completed. Your original document has not been changed.")
-            st.markdown("**Converted file**")
-            st.write(f"📄 `{output_filename}`")
-            st.download_button(
-                label="⬇️ Download converted document",
-                data=converted_bytes,
-                file_name=output_filename,
-                mime=("application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                      if ext == ".docx" else "application/vnd.adobe.indesign-idml-package"),
-                use_container_width=True,
-            )
-            st.caption("Please proofread Bengali conjuncts, matras, and mixed English/Bengali text before publishing.")
+            # Trigger the popup window modal immediately upon successful conversion
+            show_download_popup(output_filename, converted_bytes, ext)
+
         except Exception as exc:
             st.error("Conversion failed.")
             st.exception(exc)
