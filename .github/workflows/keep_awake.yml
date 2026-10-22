@@ -22,7 +22,7 @@ jobs:
 
       - name: Run ping script
         env:
-          APP_URL: "https://banglafontfinder.streamlit.app" # Replace with your URL
+          APP_URL: "https://ansitounicode.streamlit.app" # Replace with your URL
         run: |
           python -c "
           import os, time
