@@ -376,7 +376,7 @@ hr {
 
 st.markdown("""
 <div class="hero">
-  <h1>ANSI → Unicode Document Converter</h1>
+  <h1>Bangla ANSI → Unicode Document Converter</h1>
   <p>Convert all old ANSI Bengali text in Microsoft Word (.docx) and Adobe InDesign (.idml) documents seamlessly to standard Unicode Bengali.</p>
 </div>
 """, unsafe_allow_html=True)
