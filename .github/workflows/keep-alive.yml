@@ -1,9 +1,8 @@
 
-name: Streamlit Keep Alive
+name: Streamlit Auto Wake Up
 
 on:
   schedule:
-    # Run every 6 hours
     - cron: '0 */6 * * *'
   workflow_dispatch:
 
@@ -11,32 +10,82 @@ permissions:
   contents: read
 
 jobs:
-  ping-app:
+  wake-app:
     runs-on: ubuntu-latest
-    timeout-minutes: 2
+    timeout-minutes: 5
 
     steps:
-      - name: Ping Streamlit App
-        env:
-          APP_URL: https://ansitounicode.streamlit.app
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Playwright
         run: |
-          echo "Checking Streamlit app..."
+          pip install playwright
+          playwright install --with-deps chromium
 
-          HTTP_STATUS=$(curl \
-            --location \
-            --silent \
-            --show-error \
-            --output /dev/null \
-            --write-out "%{http_code}" \
-            --max-time 60 \
-            "$APP_URL") || HTTP_STATUS="000"
+      - name: Open app and click wake-up button
+        run: |
+          cat > wake_app.py <<'PY'
+          import asyncio
+          from playwright.async_api import async_playwright
 
-          echo "App URL: $APP_URL"
-          echo "HTTP Status: $HTTP_STATUS"
+          URL = "https://ansitounicode.streamlit.app"
+          BUTTON = "Yes, get this app back up!"
 
-          if [ "$HTTP_STATUS" = "200" ]; then
-            echo "App responded successfully."
-          else
-            echo "App may be sleeping or unavailable."
-            echo "Open the app manually to wake it if needed."
-          fi
+          async def main():
+              async with async_playwright() as p:
+                  browser = await p.chromium.launch(headless=True)
+                  page = await browser.new_page()
+
+                  try:
+                      print("Opening Streamlit app...")
+
+                      await page.goto(
+                          URL,
+                          wait_until="domcontentloaded",
+                          timeout=90000
+                      )
+
+                      button = page.get_by_role(
+                          "button", name=BUTTON, exact=True
+                      )
+
+                      try:
+                          await button.wait_for(
+                              state="visible", timeout=20000
+                          )
+                          print("Sleeping page detected.")
+                          print("Clicking wake-up button...")
+
+                          await button.click(timeout=15000)
+                          print("Wake-up button clicked!")
+
+                          try:
+                              await button.wait_for(
+                                  state="hidden", timeout=120000
+                              )
+                              print("Wake-up screen disappeared.")
+                          except Exception:
+                              print(
+                                  "Button remains visible; "
+                                  "check whether the app finished waking."
+                              )
+
+                      except Exception:
+                          print(
+                              "Wake-up button not found. "
+                              "The app may already be awake."
+                          )
+
+                      print("Final URL:", page.url)
+                      print("Browser title:", await page.title())
+
+                  finally:
+                      await browser.close()
+
+          asyncio.run(main())
+          PY
+
+          python wake_app.py
