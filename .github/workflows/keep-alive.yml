@@ -1,27 +1,42 @@
+
 name: Streamlit Keep Alive
 
 on:
   schedule:
-    # Runs every day every 2 hours (adjust cron as needed)
-    # Streamlit apps typically sleep after 7 days of inactivity, 
-    # but running it every few hours ensures it stays active.
-    - cron: '0 */10 * * *'
-  workflow_dispatch: # Allows you to manually trigger it from the GitHub Actions tab
+    # Run every 6 hours
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   ping-app:
     runs-on: ubuntu-latest
+    timeout-minutes: 2
+
     steps:
-      - name: Send HTTP request to wake up Streamlit app
+      - name: Ping Streamlit App
+        env:
+          APP_URL: https://ansitounicode.streamlit.app
         run: |
-          # Replace with your actual Streamlit app URL
-          APP_URL="https://ansitounicode.streamlit.app"
-          
-          response=$(curl -s -o /dev/null -w "%{http_code}" "$APP_URL")
-          echo "Pinged $APP_URL - HTTP Status: $response"
-          
-          if [ "$response" -eq 200 ] || [ "$response" -eq 302 ]; then
-            echo "Successfully woke up the app!"
+          echo "Checking Streamlit app..."
+
+          HTTP_STATUS=$(curl \
+            --location \
+            --silent \
+            --show-error \
+            --output /dev/null \
+            --write-out "%{http_code}" \
+            --max-time 60 \
+            "$APP_URL") || HTTP_STATUS="000"
+
+          echo "App URL: $APP_URL"
+          echo "HTTP Status: $HTTP_STATUS"
+
+          if [ "$HTTP_STATUS" = "200" ]; then
+            echo "App responded successfully."
           else
-            echo "Received HTTP status $response. App might still be waking up or there's an issue."
-          }
+            echo "App may be sleeping or unavailable."
+            echo "Open the app manually to wake it if needed."
+          fi
