@@ -3,7 +3,7 @@ name: Streamlit Auto Wake Up
 
 on:
   schedule:
-    - cron: '0 */6 * * *'
+    - cron: '0 */10 * * *'
   workflow_dispatch:
 
 permissions:
@@ -12,7 +12,7 @@ permissions:
 jobs:
   wake-app:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 3
 
     steps:
       - name: Set up Python
