@@ -245,7 +245,7 @@ html, body, .stApp, .panel-title, button, input, textarea, label, p, h1, h2, h3 
 
 .block-container { 
     max-width: 1100px; 
-    padding-top: 0.5rem; 
+    padding-top: 0rem; 
     padding-bottom: 1rem; 
     color: #0f172a;
 }
