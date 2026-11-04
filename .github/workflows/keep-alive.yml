@@ -1,91 +1,54 @@
-
-name: Streamlit Auto Wake Up
+name: Keep Streamlit Awake
 
 on:
   schedule:
-    - cron: '0 */10 * * *'
-  workflow_dispatch:
-
-permissions:
-  contents: read
+    - cron: '0 */10 * * *' # Runs every 4 hours (adjust cron as needed)
+  workflow_dispatch: # Allows manual trigger from the GitHub Actions tab
 
 jobs:
-  wake-app:
+  ping:
     runs-on: ubuntu-latest
-    timeout-minutes: 3
-
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: '3.10' # Fixed typo from python-python-version
 
-      - name: Install Playwright
+      - name: Install dependencies
         run: |
-          pip install playwright
-          playwright install --with-deps chromium
+          pip install selenium webdriver-manager
 
-      - name: Open app and click wake-up button
+      - name: Run ping script
+        env:
+          APP_URL: "https://ansitounicode.streamlit.app"
         run: |
-          cat > wake_app.py <<'PY'
-          import asyncio
-          from playwright.async_api import async_playwright
+          python -c "
+          import os, time
+          from selenium import webdriver
+          from selenium.webdriver.chrome.options import Options
+          from selenium.webdriver.common.by import By
+          from webdriver_manager.chrome import ChromeDriverManager
+          from selenium.webdriver.chrome.service import Service
 
-          URL = "https://ansitounicode.streamlit.app"
-          BUTTON = "Yes, get this app back up!"
-
-          async def main():
-              async with async_playwright() as p:
-                  browser = await p.chromium.launch(headless=True)
-                  page = await browser.new_page()
-
-                  try:
-                      print("Opening Streamlit app...")
-
-                      await page.goto(
-                          URL,
-                          wait_until="domcontentloaded",
-                          timeout=90000
-                      )
-
-                      button = page.get_by_role(
-                          "button", name=BUTTON, exact=True
-                      )
-
-                      try:
-                          await button.wait_for(
-                              state="visible", timeout=20000
-                          )
-                          print("Sleeping page detected.")
-                          print("Clicking wake-up button...")
-
-                          await button.click(timeout=15000)
-                          print("Wake-up button clicked!")
-
-                          try:
-                              await button.wait_for(
-                                  state="hidden", timeout=120000
-                              )
-                              print("Wake-up screen disappeared.")
-                          except Exception:
-                              print(
-                                  "Button remains visible; "
-                                  "check whether the app finished waking."
-                              )
-
-                      except Exception:
-                          print(
-                              "Wake-up button not found. "
-                              "The app may already be awake."
-                          )
-
-                      print("Final URL:", page.url)
-                      print("Browser title:", await page.title())
-
-                  finally:
-                      await browser.close()
-
-          asyncio.run(main())
-          PY
-
-          python wake_app.py
+          options = Options()
+          options.add_argument('--headless')
+          options.add_argument('--no-sandbox')
+          options.add_argument('--disable-dev-shm-usage')
+          driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+          
+          try:
+              driver.get(os.environ['APP_URL'])
+              time.sleep(10) # Let page load
+              
+              # Look for Streamlit's 'Yes, get this app back up' wake button
+              btn = driver.find_element(By.XPATH, \"//button[contains(text(), 'Yes, get this app back up')]\")
+              btn.click()
+              print('App was asleep. Clicked wake-up button!')
+          except Exception as e:
+              print('App is already awake or button not found:', e)
+          finally:
+              driver.quit()
+          "
